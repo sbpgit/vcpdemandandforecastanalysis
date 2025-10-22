@@ -191,7 +191,7 @@ sap.ui.define([
   // "1.5 kWh Solid-State Battery"
 ]
 
-
+///////////////////////NEW CHANGE DEPLOY//////////////////
             try {
                 console.log("=== onInit started ===");
                 this.showBusyIndicator(true);
