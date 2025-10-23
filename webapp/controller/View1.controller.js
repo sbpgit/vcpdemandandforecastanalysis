@@ -1,3 +1,4 @@
+
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/odata/v2/ODataModel",
@@ -8,9 +9,8 @@ sap.ui.define([
 ], (Controller, ODataModel, JSONModel, Filter, FilterOperator, MessageToast) => {
     "use strict";
     var that;
-
-    return Controller.extend("vcp.vcpdemandandforecastanalysis.controller.View1", {
-    _bCharValProgrammatic: false,
+    return Controller.extend("sacforecastorder.sacforecastorder.controller.View1", {
+        _bCharValProgrammatic: false,
         _bLoadingCharacteristics: false,
         _bCharSelectionInProgress: false,
         _bCharValInitialLoad: true,
@@ -191,7 +191,7 @@ sap.ui.define([
   // "1.5 kWh Solid-State Battery"
 ]
 
-///////////////////////NEW CHANGE DEPLOY//////////////////
+
             try {
                 console.log("=== onInit started ===");
                 this.showBusyIndicator(true);
@@ -4210,5 +4210,5 @@ console.log("")
             return fetchData();
         }
     });
-}); /////////new change reflect//////////////
+});
 
