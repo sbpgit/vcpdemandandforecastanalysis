@@ -59,7 +59,7 @@
   "sap.ui5": {
     "flexEnabled": false,
     "dependencies": {
-      "minUI5Version": "1.141.3",
+      "minUI5Version": "1.122.2",
       "libs": {
         "sap.m": {},
         "sap.ui.core": {}
@@ -128,5 +128,16 @@
       "id": "App",
       "async": true
     }
-  }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "vcpvcpdemandandforecastanalysis"
+  },
+   "sap.platform.cf": {
+    "oAuthScopes": [
+        "$XSAPPNAME.User"
+
+    ],
+    "ui5VersionNumber": "1.122.2"
+}
 }
