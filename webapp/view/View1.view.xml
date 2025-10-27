@@ -1,5 +1,5 @@
 <mvc:View controllerName="vcp.vcpdemandandforecastanalysis.controller.View1"
-    xmlns:mvc="sap.ui.core.mvc"
+   xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns="sap.m"
     xmlns:viz="sap.viz.ui5.controls"
@@ -19,6 +19,8 @@
                     persistencyKey="myPersKey"
                     useToolbar="false"
                     search="onApplyFilters"
+                    showClearOnFB="true"
+                    clear="onClear"
                 >
                     <fb:filterGroupItems>
                         <fb:FilterGroupItem
@@ -73,7 +75,7 @@
                             mandatory="true"
                         >
                             <fb:control>
-                                <Select
+                                <!-- <Select
                                     id="idProduct"
                                     forceSelection="false"
                                     items="{/}"
@@ -83,7 +85,13 @@
                                         key="{PRODUCT_ID}"
                                         text="{PRODUCT_ID}"
                                     />
-                                </Select>
+                                </Select> -->
+                                <ComboBox id="idProduct" items="{path:'/'}" change=".onProductChange" >
+                                  <core:Item
+                                        key="{PRODUCT_ID}"
+                                        text="{PRODUCT_ID}"
+                                    />
+                                </ComboBox>
                             </fb:control>
                         </fb:FilterGroupItem>
 

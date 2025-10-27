@@ -16,227 +16,61 @@ sap.ui.define([
         _bCharValInitialLoad: true,
         _bUniqueIDSelectionInProgress: false,
         _bInitialLoadInProgress: false,
-        async onInit() {
+        onInit() {
 
             that = this;
             that.SelectedAll = false;
             that.oModel = that.getOwnerComponent().getModel("oModel");
-            that.data =[
-  // 2.0 kWh Hybrid Battery
-  {
-    "LOCATION_ID": "1600",
-    "PRODUCT_ID": "VCP_1600",
-    "MODEL_VERSION": "",
-    "SCENARIO": "_PLAN",
-    "TYPE": "PI",
-    "UNIQUE_ID": 3101,
-    "VERSION": "__BASELINE",
-    "WEEK_DATE": "2025-10-16",
-    "TELESCOPIC_WEEK": "CW42 2025",
-    "Year Quarter": "2025-Q4",
-    "COMPONENT": "BAT-HYB-1.5",
-    "CALENDAR_WEEK": "CW42 2025",
-    "ASSEMBLY_DESC": "2.0 kWh Hybrid Battery",
-    "CIR_QTY": 120,
-    "ACTUAL_QTY": 8000000000,
-    "CONFIG_PROD": "VCP_1600",
-    "START_DATE": "2025-10-16",
-    "END_DATE": "2025-12-31"
-  },
-  {
-    "LOCATION_ID": "1600",
-    "PRODUCT_ID": "VCP_1600",
-    "MODEL_VERSION": "",
-    "SCENARIO": "_PLAN",
-    "TYPE": "PI",
-    "UNIQUE_ID": 3102,
-    "VERSION": "__BASELINE",
-    "WEEK_DATE": "2025-10-23",
-    "TELESCOPIC_WEEK": "CW43 2025",
-    "Year Quarter": "2025-Q4",
-    "COMPONENT": "BAT-HYB-1.5",
-    "CALENDAR_WEEK": "CW43 2025",
-    "ASSEMBLY_DESC": "2.0 kWh Hybrid Battery",
-    "CIR_QTY": 140,
-    "ACTUAL_QTY": 3000000000,
-    "CONFIG_PROD": "VCP_1600",
-    "START_DATE": "2025-10-16",
-    "END_DATE": "2025-12-31"
-  },
-  {
-    "LOCATION_ID": "1600",
-    "PRODUCT_ID": "VCP_1600",
-    "MODEL_VERSION": "",
-    "SCENARIO": "_PLAN",
-    "TYPE": "PI",
-    "UNIQUE_ID": 3103,
-    "VERSION": "__BASELINE",
-    "WEEK_DATE": "2025-10-30",
-    "TELESCOPIC_WEEK": "CW44 2025",
-    "Year Quarter": "2025-Q4",
-    "COMPONENT": "BAT-HYB-1.5",
-    "CALENDAR_WEEK": "CW44 2025",
-    "ASSEMBLY_DESC": "2.0 kWh Hybrid Battery",
-    "CIR_QTY": 160,
-    "ACTUAL_QTY": 4000000000,
-    "CONFIG_PROD": "VCP_1600",
-    "START_DATE": "2025-10-16",
-    "END_DATE": "2025-12-31"
-  },
-  {
-    "LOCATION_ID": "1600",
-    "PRODUCT_ID": "VCP_1600",
-    "MODEL_VERSION": "",
-    "SCENARIO": "_PLAN",
-    "TYPE": "PI",
-    "UNIQUE_ID": 3104,
-    "VERSION": "__BASELINE",
-    "WEEK_DATE": "2025-11-06",
-    "TELESCOPIC_WEEK": "CW45 2025",
-    "Year Quarter": "2025-Q4",
-    "COMPONENT": "BAT-HYB-1.5",
-    "CALENDAR_WEEK": "CW45 2025",
-    "ASSEMBLY_DESC": "2.0 kWh Hybrid Battery",
-    "CIR_QTY": 180,
-    "ACTUAL_QTY": 5000000000,
-    "CONFIG_PROD": "VCP_1600",
-    "START_DATE": "2025-10-16",
-    "END_DATE": "2025-12-31"
-  },
-
-  // 1.8 kWh Lithium Battery
-  {
-    "LOCATION_ID": "1600",
-    "PRODUCT_ID": "VCP_1600",
-    "MODEL_VERSION": "",
-    "SCENARIO": "_PLAN",
-    "TYPE": "PI",
-    "UNIQUE_ID": 3201,
-    "VERSION": "__BASELINE",
-    "WEEK_DATE": "2025-10-16",
-    "TELESCOPIC_WEEK": "CW42 2025",
-    "Year Quarter": "2025-Q4",
-    "COMPONENT": "BAT-HYB-1.5",
-    "CALENDAR_WEEK": "CW42 2025",
-    "ASSEMBLY_DESC": "1.8 kWh Lithium Battery",
-    "CIR_QTY": 180,
-    "ACTUAL_QTY": 6000000000,
-    "CONFIG_PROD": "VCP_1600",
-    "START_DATE": "2025-10-16",
-    "END_DATE": "2025-12-31"
-  },
-  {
-    "LOCATION_ID": "1600",
-    "PRODUCT_ID": "VCP_1600",
-    "MODEL_VERSION": "",
-    "SCENARIO": "_PLAN",
-    "TYPE": "PI",
-    "UNIQUE_ID": 3202,
-    "VERSION": "__BASELINE",
-    "WEEK_DATE": "2025-10-23",
-    "TELESCOPIC_WEEK": "CW43 2025",
-    "Year Quarter": "2025-Q4",
-    "COMPONENT": "BAT-HYB-1.5",
-    "CALENDAR_WEEK": "CW43 2025",
-    "ASSEMBLY_DESC": "1.8 kWh Lithium Battery",
-    "CIR_QTY": 150,
-    "ACTUAL_QTY": 7000000000,
-    "CONFIG_PROD": "VCP_1600",
-    "START_DATE": "2025-10-16",
-    "END_DATE": "2025-12-31"
-  },
-  {
-    "LOCATION_ID": "1600",
-    "PRODUCT_ID": "VCP_1600",
-    "MODEL_VERSION": "",
-    "SCENARIO": "_PLAN",
-    "TYPE": "PI",
-    "UNIQUE_ID": 3203,
-    "VERSION": "__BASELINE",
-    "WEEK_DATE": "2025-10-30",
-    "TELESCOPIC_WEEK": "CW44 2025",
-    "Year Quarter": "2025-Q4",
-    "COMPONENT": "BAT-HYB-1.5",
-    "CALENDAR_WEEK": "CW44 2025",
-    "ASSEMBLY_DESC": "1.8 kWh Lithium Battery",
-    "CIR_QTY": 130,
-    "ACTUAL_QTY": 8000000000,
-    "CONFIG_PROD": "VCP_1600",
-    "START_DATE": "2025-10-16",
-    "END_DATE": "2025-12-31"
-  },
-  {
-    "LOCATION_ID": "1600",
-    "PRODUCT_ID": "VCP_1600",
-    "MODEL_VERSION": "",
-    "SCENARIO": "_PLAN",
-    "TYPE": "PI",
-    "UNIQUE_ID": 3204,
-    "VERSION": "__BASELINE",
-    "WEEK_DATE": "2025-11-06",
-    "TELESCOPIC_WEEK": "CW45 2025",
-    "Year Quarter": "2025-Q4",
-    "COMPONENT": "BAT-HYB-1.5",
-    "CALENDAR_WEEK": "CW45 2025",
-    "ASSEMBLY_DESC": "1.8 kWh Lithium Battery",
-    "CIR_QTY": 100,
-    "ACTUAL_QTY": 9000000000,
-    "CONFIG_PROD": "VCP_1600",
-    "START_DATE": "2025-10-16",
-    "END_DATE": "2025-12-31"
-  }
-
-  // Similarly, you can replicate 4 combinations for:
-  // "1.2 kWh Lead-Acid Battery"
-  // "1.5 kWh Solid-State Battery"
-]
+            that.data = []
+            that.prev = [];
 
 
-            try {
-                console.log("=== onInit started ===");
-                this.showBusyIndicator(true);
+            // try {
+            //     console.log("=== onInit started ===");
+            // that.showBusyIndicator(true);
 
-                // Fetch locations data
-                const loc = await that.readModel("getPlannedOrdAnalysis", {
-                    $apply: 'groupby((LOCATION_ID),aggregate($count as Count))'
-                });
+            // Fetch locations data
+            // const loc = await that.readModel("getPlannedOrdAnalysis", {
+            //     $apply: 'groupby((LOCATION_ID),aggregate($count as Count))'
+            // });
 
-                  that.oModel.read("/getAsmbReqAnalysis", {
+            that.oModel.read("/getPlannedOrdAnalysis", {
                 // filters: aFilters,
                 urlParameters: {
-                    $apply: `filter(LOCATION_ID eq '1000' and PRODUCT_ID eq 'VCP_VEHICLE'  and (WEEK_DATE ge 2025-10-01 and WEEK_DATE le 2026-01-31))`,
+                    $apply: 'groupby((LOCATION_ID),aggregate($count as Count))',
                     // "$select": "WEEK_DATE,ASSEMBLY_DESC,CIR_QTY,COUNT",
                     "$top": 100000
                 },
                 success: function (oData) {
                     console.log(oData);
+
+
+                    var locationModel = new JSONModel(oData.results);
+                    that.byId("idLocation").setModel(locationModel);
+                    // console.log("Locations loaded:", loc);
+
+                    that.byId("idLocation").setSelectedKey("");
+                    // this.byId("idLocation").setForceSelection(false);
+
+                    // Bind initial data to view - NO DEFAULT SELECTION
+                    // this.bindDataToView(loc);
+                    that.showBusyIndicator(false);
+
+                    // console.log("onInit completed without default selections");
                 },
-            error:function(error){
-                console.log(error);
+                error: function (error) {
+                    console.log(error);
                 }
             });
-            
 
-                var locationModel = new JSONModel(loc);
-            this.byId("idLocation").setModel(locationModel);
-                console.log("Locations loaded:", loc);
 
-                 this.byId("idLocation").setSelectedKey("");
-            // this.byId("idLocation").setForceSelection(false);
-
-                // Bind initial data to view - NO DEFAULT SELECTION
-                // this.bindDataToView(loc);
-                this.showBusyIndicator(false);
-
-                console.log("onInit completed without default selections");
-
-            } catch (error) {
-                console.error("Error in onInit:", error);
-                this.showErrorMessage("Failed to load dropdown data: " + error.message);
-            } finally {
-                this.showBusyIndicator(false);
-                console.log("=== onInit finished ===");
-            }
+            // } catch (error) {
+            //     console.error("Error in onInit:", error);
+            //     this.showErrorMessage("Failed to load dropdown data: " + error.message);
+            // } finally {
+            //     this.showBusyIndicator(false);
+            //     console.log("=== onInit finished ===");
+            // }
         },
         onAfterRendering() {
             // const oDateL = new Date();
@@ -319,6 +153,15 @@ sap.ui.define([
 
             // Load Configuration Products for this location
             this.loadConfigProductsForLocation(selectedLocation);
+            that.byId("idConfigProduct").setSelectedKey();
+            that.byId("idProduct").setSelectedKey();
+            that.byId("idUniqueID").setSelectedKeys([]);
+            that.byId("idModelVersion").setSelectedKeys([]);
+            const oToday = new Date();
+            const oDateL = new Date(oToday.getFullYear(), oToday.getMonth(), 1);
+            const oDateH = new Date(oDateL.getFullYear(), oDateL.getMonth() + 3, 0);
+            that.byId("DRS1").setDateValue(oDateL);
+            that.byId("DRS1").setSecondDateValue(oDateH);
         },
 
         clearAllCharts: function () {
@@ -482,7 +325,7 @@ sap.ui.define([
         },
 
         // MODIFIED: onProductChange to trigger auto-selection
-        onProductChange:async function (oEvent) {
+        onProductChange: async function (oEvent) {
             var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
             var sSelectedProduct = oEvent.getSource().getSelectedKey();
@@ -496,8 +339,8 @@ sap.ui.define([
             }
 
             const modelVData = await this.readModel("getPlannedOrdAnalysis", {
-                    $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}')/groupby((MODEL_VERSION,UNIQUE_ID),aggregate($count as Count))`
-                });
+                $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}')/groupby((MODEL_VERSION,UNIQUE_ID),aggregate($count as Count))`
+            });
 
 
             const modelVersions = Array.from(
@@ -509,11 +352,11 @@ sap.ui.define([
             ).map(id => ({ UNIQUE_ID: id }));
 
 
-                const modelVModel = new JSONModel(modelVersions);
-                that.byId("idModelVersion").setModel(modelVModel);
-                
-                 const uidModel = new JSONModel(uniqueIDs);
-                that.byId("idUniqueID").setModel(uidModel);
+            const modelVModel = new JSONModel(modelVersions);
+            that.byId("idModelVersion").setModel(modelVModel);
+
+            const uidModel = new JSONModel(uniqueIDs);
+            that.byId("idUniqueID").setModel(uidModel);
 
             // Check if all mandatory fields are now filled
             // this.checkAndAutoSelect();
@@ -576,32 +419,71 @@ sap.ui.define([
         },
 
         // MODIFIED: Trigger auto-selection when config product changes
+        // onConfigProductChange: function (oEvent) {
+        //     // this.byId("idProduct").setBusy(true);
+        //     var sSelectedConfigProduct = oEvent.getSource().getSelectedKey();
+        //     console.log("Selected Config Product:", sSelectedConfigProduct);
+
+        //     this.clearDependentDropdowns();
+
+        //     if (!sSelectedConfigProduct) return;
+
+        //     var aConfigProducts = [sSelectedConfigProduct];
+        //     this.updateProductDropdowns(aConfigProducts);
+
+        //     var oProductSelect = this.byId("idProduct");
+        //     if (oProductSelect) {
+        //         oProductSelect.detachChange(this.onProductChange, this);
+        //         oProductSelect.setSelectedKey(null);
+        //         oProductSelect.attachChange(this.onProductChange, this);
+        //     }
+
+        //     // this.loadCharacteristics(aConfigProducts);
+        //     this.clearAllCharts();
+
+        //     // Check for auto-selection after config product is loaded
+        //     // setTimeout(() => {
+        //     //     this.checkAndAutoSelect();
+        //     // }, 500);
+        // },
         onConfigProductChange: function (oEvent) {
-            // this.byId("idProduct").setBusy(true);
-            var sSelectedConfigProduct = oEvent.getSource().getSelectedKey();
-            console.log("Selected Config Product:", sSelectedConfigProduct);
+            var oModel = this.getView().getModel();
+            var selectedLocation = this.byId("idLocation").getSelectedKey();
+            var sSelectedConfigProduct = this.byId("idConfigProduct").getSelectedKey();
+            var aSelectedConfigProducts = sSelectedConfigProduct ? [sSelectedConfigProduct] : [];
 
-            this.clearDependentDropdowns();
-
-            if (!sSelectedConfigProduct) return;
-
-            var aConfigProducts = [sSelectedConfigProduct];
-            this.updateProductDropdowns(aConfigProducts);
-
-            var oProductSelect = this.byId("idProduct");
-            if (oProductSelect) {
-                oProductSelect.detachChange(this.onProductChange, this);
-                oProductSelect.setSelectedKey(null);
-                oProductSelect.attachChange(this.onProductChange, this);
+            if (!selectedLocation || !aSelectedConfigProducts.length) {
+                console.log("Missing selections, skipping product load");
+                this.clearDependentDropdowns();
+                return;
             }
 
-            // this.loadCharacteristics(aConfigProducts);
-            this.clearAllCharts();
+            // this.showBusyIndicator(true);
+            // this.clearDependentDropdowns();
+            //  const prodData = await this.readModel("getPlannedOrdAnalysis", {
+            //         $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID),aggregate($count as Count))`
+            //     });
+            that.oModel.read("/getPlannedOrdAnalysis", {
+                urlParameters: {
+                    $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID),aggregate($count as Count))`
 
-            // Check for auto-selection after config product is loaded
-            // setTimeout(() => {
-            //     this.checkAndAutoSelect();
-            // }, 500);
+                },
+                success: function (oData) {
+                    //         console.log(oData)
+                    that.byId("idProduct").setSelectedKey();
+                    that.byId("idUniqueID").setSelectedKeys([]);
+                    that.byId("idModelVersion").setSelectedKeys([]);
+
+                    const prodModel = new JSONModel(oData.results)
+                    that.byId("idProduct").setSelectedKey();
+
+                    that.byId("idProduct").setModel(prodModel);
+                },
+                error: function (error) {
+                    console.log(error)
+                }
+
+            })
         },
 
         // MODIFIED: Update clearDependentDropdowns to maintain "Select All" structure
@@ -726,24 +608,24 @@ sap.ui.define([
             //  const prodData = await this.readModel("getPlannedOrdAnalysis", {
             //         $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID),aggregate($count as Count))`
             //     });
-               that.oModel.read("/getPlannedOrdAnalysis",{
-                    urlParameters:{
+            that.oModel.read("/getPlannedOrdAnalysis", {
+                urlParameters: {
                     $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID),aggregate($count as Count))`
-   
-                    },
-                    success:function(oData){
-                //         console.log(oData)
-                        const prodModel = new JSONModel(oData.results)
-                that.byId("idProduct").setModel(prodModel);
-                    },
-                    error:function(error){
-                        console.log(error)
-                    }
 
-                })
+                },
+                success: function (oData) {
+                    //         console.log(oData)
+                    const prodModel = new JSONModel(oData.results)
+                    that.byId("idProduct").setModel(prodModel);
+                },
+                error: function (error) {
+                    console.log(error)
+                }
 
-                // const prodModel = new JSONModel(prodData)
-                // that.byId("idProduct").setModel(prodModel);
+            })
+
+            // const prodModel = new JSONModel(prodData)
+            // that.byId("idProduct").setModel(prodModel);
             //     const dependentModel = this.getView().getModel("dependentModel") || new JSONModel({
             //     Products: []
             // });
@@ -841,9 +723,9 @@ sap.ui.define([
         },
 
 
-    onFilter:function(oEvent){
-console.log("")
-    },
+        onFilter: function (oEvent) {
+            console.log("")
+        },
 
         onApplyFilters: function (oEvent) {
             var oView = this.getView();
@@ -851,10 +733,12 @@ console.log("")
             // Collect mandatory values
             var sLocation = oView.byId("idLocation").getSelectedKey();
             var sUniqueIds = oView.byId("idUniqueID").getSelectedKeys();
-            var sProduct = oView.byId("idProduct").getSelectedKey();
+            var sProduct = oView.byId("idProduct").getSelectedKey() !== "" ? oView.byId("idProduct").getSelectedKey() : oView.byId("idProduct").getSelectedItem().getText();
             var oStartDate = oView.byId("DRS1").getDateValue();
             var oEndDate = oView.byId("DRS1").getSecondDateValue();
-
+            if (oView.byId("idProduct").getSelectedKey() == "") {
+                oView.byId("idProduct").setSelectedKey(sProduct);
+            }
             // Validate
             if (!sLocation || !sProduct || !oStartDate || !oEndDate) {
                 sap.m.MessageToast.show("Please fill all mandatory fields before proceeding.");
@@ -874,8 +758,8 @@ console.log("")
                     new sap.ui.model.Filter("PRODUCT_ID", sap.ui.model.FilterOperator.EQ, sProduct),
                     new sap.ui.model.Filter("WEEK_DATE", sap.ui.model.FilterOperator.BT, oStartDate, oEndDate)
                 ],
-                urlParameters:{
-                    $top:100000
+                urlParameters: {
+                    $top: 100000
                 },
                 success: function (oData) {
                     if (oData.results && oData.results.length) {
@@ -903,12 +787,12 @@ console.log("")
                         // 🔹 Select all unique IDs automatically
                         var selUID = that.byId("idUniqueID").getSelectedKeys()
                         var aKeys = [];
-                        if(selUID.length == 0 || oView.byId("idUniqueID").getSelectAllCheckbox().getSelected() === true){
-                            oView.byId("idUniqueID").getItems().forEach(y=>{
-                               aKeys.push( y.getText())
+                        if (selUID.length == 0 || oView.byId("idUniqueID").getSelectAllCheckbox().getSelected() === true) {
+                            oView.byId("idUniqueID").getItems().forEach(y => {
+                                aKeys.push(y.getText())
                             })
                         }
-                        else{
+                        else {
                             aKeys = selUID;
                         }
 
@@ -944,8 +828,7 @@ console.log("")
                         );
                         that.loadForecastChart();
                         that.loadActualChart()
-                        //////// reseting data/////
-                        if(that.chartfinData){
+                        if (that.chartfinData) {
                             that.chartfinData = undefined;
                         }
 
@@ -964,7 +847,7 @@ console.log("")
             });
         },
 
-         loadCharValChart: function (sLocation, sProduct, oStartDate, oEndDate, aUniqueIds) {
+        loadCharValChart: function (sLocation, sProduct, oStartDate, oEndDate, aUniqueIds) {
             var oModel = this.getView().getModel();
             // var oModel = this.getView().getModel();
 
@@ -1141,6 +1024,8 @@ console.log("")
                             var aFormattedCharValues = Array.from(aAllCharValues).map(function (val) {
                                 return { key: val, text: val };
                             });
+                            // aFormattedCharValues.sort()
+                            aFormattedCharValues.sort((a, b) => a.text.localeCompare(b.text));
                             aFormattedCharValues.unshift({ key: "Select All", text: "Select All" });
 
                             oCharValCtrl.setModel(new sap.ui.model.json.JSONModel({ CharValNum: aFormattedCharValues }));
@@ -1186,7 +1071,7 @@ console.log("")
             // 🔹 Read CirGen and build chart
             oModel.read("/getCirGen", {
                 filters: aFilters,
-                urlParameters:{
+                urlParameters: {
                     "$top": 100000
                 },
                 success: function (oData) {
@@ -1242,7 +1127,7 @@ console.log("")
                     oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
                         uid: "valueAxis",
                         type: "Measure",
-                        values: ["Forecast","Actual"]
+                        values: ["Forecast", "Actual"]
                     }));
 
                     // Set properties with data labels
@@ -1298,19 +1183,28 @@ console.log("")
                             title: {
                                 visible: false
                             }
+                        }, tooltip: {
+                            visible: true,
+                            formatString: "#,##0"
                         },
                         title: {
                             visible: false,
                             text: "Actual vs Unconsumed"
                         },
                         interaction: {
-                            selectability: {
-                                mode: "exclusive"
-                            }
+                            // selectability: {
+                            //     mode: "exclusive"
+                            // }
+                            behaviorType: "automatic"
                         }
 
-                    }),
-                        console.log("CirGen chart loaded with", aChartData.length, "records");
+
+                    })
+                    var oPopOver = new sap.viz.ui5.controls.Popover({});
+                    oPopOver.connect(oVizFrame.getVizUid());
+                    oPopOver.setFormatString(sap.viz.ui5.format.ChartFormatter.DefaultPattern.STANDARDFLOAT);
+
+                    console.log("CirGen chart loaded with", aChartData.length, "records");
 
                     var aCharFilters = [];
 
@@ -1495,7 +1389,7 @@ console.log("")
             var sProducts = this.byId("idProduct").getSelectedKey();
             var aProducts = sProducts ? [sProducts] : [];
             var aModelVersions = this.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
-            aModelVersions = aModelVersions.length ==0? '':aModelVersions;
+            aModelVersions = aModelVersions.length == 0 ? '' : aModelVersions;
             // var aUniqueIds = this.byId("idUniqueID").getSelectedKeys().filter(uid => uid && uid.trim() !== "");
             // var aUniqueIds = this.byId("idUniqueID").getSelectedKeys().filter(uid => uid && uid.trim() !== "");
 
@@ -1566,9 +1460,11 @@ console.log("")
             // Read CHAR_DESC from OData
             var oModel = this.getView().getModel();
             oModel.read("/getPlannedOrdAnalysis", {
-                urlParameters: { $apply: `filter(LOCATION_ID eq '${sLocationId}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sProducts}')/groupby((CHAR_DESC,CHAR_NUM))`,
+                urlParameters: {
+                    $apply: `filter(LOCATION_ID eq '${sLocationId}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sProducts}')/groupby((CHAR_DESC,CHAR_NUM))`,
                     //"$select": "CHAR_DESC, CHAR_NUM",
-                     "$top": 100000 },
+                    "$top": 100000
+                },
                 // filters: aFilters,
                 success: function (oData) {
                     // Get unique CHAR_DESC values
@@ -1583,10 +1479,10 @@ console.log("")
                     //         oData.results.map(item => [`${item.CHAR_DESC}_${item.CHAR_NUM}`, item])
                     //     ).values()
                     // );
-                    var aFormatted = oData.results.map(function (c) { return { key: c.CHAR_DESC, text: c.CHAR_DESC,desc:c.CHAR_NUM }; });
+                    var aFormatted = oData.results.map(function (c) { return { key: c.CHAR_DESC, text: c.CHAR_DESC, desc: c.CHAR_NUM }; });
 
 
-
+                    aFormatted.sort((a, b) => a.text.localeCompare(b.text));
                     // Prepend "Select All"
                     aFormatted.unshift({ key: "ALL", text: "Select All" });
 
@@ -1632,37 +1528,37 @@ console.log("")
 
 
 
-        onCharSelectAll: function(oEvent) {
-            var oList =that.byId("idCharacteristics")// oEvent.getSource();
-                var aSelectedItems = oList.getSelectedItems();
-                var oSelectAllItem = oList.getItems().find(i => i.getTitle() === "Select All");
-                var aAllItemsExceptSelectAll = oList.getItems().filter(i => i.getTitle() !== "Select All");
+        onCharSelectAll: function (oEvent) {
+            var oList = that.byId("idCharacteristics")// oEvent.getSource();
+            var aSelectedItems = oList.getSelectedItems();
+            var oSelectAllItem = oList.getItems().find(i => i.getTitle() === "Select All");
+            var aAllItemsExceptSelectAll = oList.getItems().filter(i => i.getTitle() !== "Select All");
 
-                if (oEvent.getParameter("listItem") === oSelectAllItem) {
-                    if (oSelectAllItem.getSelected()) {
-                        that.SelectedAll = true;
-                        aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, true));
-                        var aAllCharKeys = aAllItemsExceptSelectAll.map(item => item.getTitle());
-                        // this._loadValuesAndUniqueIDs(aAllCharKeys);
-                        // this._loadAllUniqueIDsForAllCharacteristics(aAllCharKeys);
-                        // this._loadValuesAndUniqueIDs(aAllCharKeys);
-                    } else {
-                        aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, false));
-                        var oCharValNum = this.byId("idCharValNum");
-                        var oCharChart = this.byId("idCharChart");
+            if (oEvent.getParameter("listItem") === oSelectAllItem) {
+                if (oSelectAllItem.getSelected()) {
+                    that.SelectedAll = true;
+                    aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, true));
+                    var aAllCharKeys = aAllItemsExceptSelectAll.map(item => item.getTitle());
+                    // this._loadValuesAndUniqueIDs(aAllCharKeys);
+                    // this._loadAllUniqueIDsForAllCharacteristics(aAllCharKeys);
+                    // this._loadValuesAndUniqueIDs(aAllCharKeys);
+                } else {
+                    aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, false));
+                    var oCharValNum = this.byId("idCharValNum");
+                    var oCharChart = this.byId("idCharChart");
 
-                        if (oCharValNum) {
-                            oCharValNum.unbindItems();
-                            oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
-                        }
-
-                        if (oCharChart) {
-                            oCharChart.unbindElement();
-                            oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
-                        }
-                        // this._clearUniqueIDSelection();
+                    if (oCharValNum) {
+                        oCharValNum.unbindItems();
+                        oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
                     }
+
+                    if (oCharChart) {
+                        oCharChart.unbindElement();
+                        oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
+                    }
+                    // this._clearUniqueIDSelection();
                 }
+            }
         },
 
         // Replace your existing onCharacteristicChange function with this:
@@ -1673,17 +1569,17 @@ console.log("")
             this._bCharSelectionInProgress = true;
 
             try {
-                var oList =that.byId("idCharacteristics")// oEvent.getSource();
+                var oList = that.byId("idCharacteristics")// oEvent.getSource();
                 var aSelectedItems = oList.getSelectedItems();
                 var oSelectAllItem = oList.getItems().find(i => i.getTitle() === "Select All");
                 var aAllItemsExceptSelectAll = oList.getItems().filter(i => i.getTitle() !== "Select All");
-
+                var CHARS = oEvent.getSource().getSelectedItem().getTitle()
                 if (oEvent.getParameter("listItem") === oSelectAllItem) {
                     if (oSelectAllItem.getSelected()) {
                         that.SelectedAll = true;
                         aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, true));
                         var aAllCharKeys = aAllItemsExceptSelectAll.map(item => item.getTitle());
-                       this._loadCharacteristicValues(aAllCharKeys);
+                        this._loadCharacteristicValues(aAllCharKeys);
                         // this._loadAllUniqueIDsForAllCharacteristics(aAllCharKeys);
                         // this._loadValuesAndUniqueIDs(aAllCharKeys);
                     } else {
@@ -1731,6 +1627,21 @@ console.log("")
                 }
             } finally {
                 this._bCharSelectionInProgress = false;
+            //     if (that.prev.length > 0) {
+            //         var charValLis = that.byId("idCharValNum").getItems();
+            //         that.prev.forEach(x => {
+            //             if (x.CHAR === CHARS && oEvent.getSource().getSelectedItem().getSelected()== true) {
+            //                 charValLis.forEach(y => {
+            //                     if (y.getTitle() == x.CHAR_VAL) {
+            //                         y.setSelected(true);
+            //                     }
+            //                     else {
+            //                         y.setSelected(false);
+            //                     }
+            //                 })
+            //             }
+            //         })
+            //     }
             }
         },
 
@@ -1774,7 +1685,7 @@ console.log("")
         //     this.showBusyIndicator(true);
         //     var that = this;
 
-            
+
 
         //     // Fetch ALL Unique IDs for the selected characteristics (union - no filtering by values)
         //     oModel.read("/getPlannedOrdAnalysis", {
@@ -1888,11 +1799,11 @@ console.log("")
                 filters: aFilters,
                 success: function (oData) {
                     // Extract unique characteristic values
-                    var aCharValues=[];
-                    oData.results.forEach(i=>{
-                       var obj={
-                            CHAR_CHARVALUE:i.CHAR_CHARVALUE,
-                            CHAR_NUM:i.CHAR_NUM
+                    var aCharValues = [];
+                    oData.results.forEach(i => {
+                        var obj = {
+                            CHAR_CHARVALUE: i.CHAR_CHARVALUE,
+                            CHAR_NUM: i.CHAR_NUM
                         }
                         aCharValues.push(obj)
                     })
@@ -1907,8 +1818,8 @@ console.log("")
                     console.log("Characteristic values loaded:", aUniqueCharValues.length);
 
                     // STEP 2: Populate idCharValNum with these values
-                    var aFormattedValues = aUniqueCharValues.map(val => ({ key: val.CHAR_CHARVALUE, text: val.CHAR_CHARVALUE,desc:val.CHAR_NUM }));
-                    aFormattedValues.unshift({ key: "ALL", text: "Select All",desc:"Select All" });
+                    var aFormattedValues = aUniqueCharValues.map(val => ({ key: val.CHAR_CHARVALUE, text: val.CHAR_CHARVALUE, desc: val.CHAR_NUM }));
+                    aFormattedValues.unshift({ key: "ALL", text: "Select All", desc: "Select All" });
 
                     var oCharValModel = new sap.ui.model.json.JSONModel({ CharValNum: aFormattedValues });
                     var oCharValCtrl = that.byId("idCharValNum");
@@ -1919,7 +1830,7 @@ console.log("")
                         path: "charValModel>/CharValNum",
                         template: new sap.m.StandardListItem({
                             title: "{charValModel>text}",
-                         
+
                         })
                     });
 
@@ -2162,7 +2073,7 @@ console.log("")
                     oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
                         uid: "valueAxis",
                         type: "Measure",
-                        values: [ "Forecast","Actual"]
+                        values: ["Forecast", "Actual"]
                     }));
 
                     oVizFrame.setVizProperties({
@@ -2414,15 +2325,15 @@ console.log("")
 
                     // Delay before releasing the flags and proceeding
                     if (aCommonUniqueIDs.length !== 0) {
-                    setTimeout(function () {
-                        that._bCharValProgrammatic = false;
+                        setTimeout(function () {
+                            that._bCharValProgrammatic = false;
 
-                        // Now proceed with chart loading
-                        that._autoLoadProductChart(aKeysToSelect);
-                        that._loadChartDataForCharValues(aKeysToSelect);
-                    }, 200);
-                }
-                that.showBusyIndicator(false);
+                            // Now proceed with chart loading
+                            that._autoLoadProductChart(aKeysToSelect);
+                            that._loadChartDataForCharValues(aKeysToSelect);
+                        }, 200);
+                    }
+                    that.showBusyIndicator(false);
 
                 }.bind(this),
                 error: function (oError) {
@@ -2623,15 +2534,18 @@ console.log("")
                     var aValues = [];
                     oData.results.forEach(function (item) {
                         if (item.CHAR_CHARVALUE && !aValues.includes(item.CHAR_CHARVALUE)) {
-                            aValues.push({CHAR_CHARVALUE:item.CHAR_CHARVALUE,CHAR_NUM:item.CHAR_NUM});
+                            aValues.push({ CHAR_CHARVALUE: item.CHAR_CHARVALUE, CHAR_NUM: item.CHAR_NUM });
                         }
                     });
 
                     // Prepare data
-                    var aListData = [{ text: "Select All", Desc: "Select All" }];
+                    aValues.sort((a, b) => a.CHAR_CHARVALUE.localeCompare(b.CHAR_CHARVALUE));
+                    var aListData = [];
+                    // var aListData = [{ text: "Select All", Desc: "Select All" }];
                     aValues.forEach(val => aListData.push({ text: val.CHAR_CHARVALUE, Desc: val.CHAR_NUM }));
+                    aListData.unshift({ key: "Select All", text: "Select All" });
 
-                                        var aCharFilters = [];
+                    var aCharFilters = [];
 
                     // Include all characteristics if none selected
                     var oCharModel = that.byId("idCharacteristics").getModel("charModel");
@@ -2933,364 +2847,404 @@ console.log("")
 
 
 
-        onAppFilter: function(){
+        onAppFilter: function () {
             var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
             var sSelectedProduct = that.byId("idProduct").getSelectedKey();
-             var aModelVersions = this.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
-            aModelVersions = aModelVersions.length == 0 ? '':aModelVersions;
+            var aModelVersions = this.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            aModelVersions = aModelVersions.length == 0 ? '' : aModelVersions;
             // var modelVersion = that.byId("idModelVersion").getSelectedKey().length>0 ?that.byId("idModelVersion").getSelectedKey():"";
-             var oStartDate = this.byId("DRS1").getDateValue().toLocaleDateString("en-CA")
+            var oStartDate = this.byId("DRS1").getDateValue().toLocaleDateString("en-CA")
             var oEndDate = this.byId("DRS1").getSecondDateValue().toLocaleDateString("en-CA")
 
-           var charValList =  that.byId("idCharValNum")
-           var listItems = charValList.getSelectedItems();
-           var charcharvalTitle = [];
-           listItems.forEach(i=>{
-            charcharvalTitle.push(i.getTitle());
-           })
-        
-         const charcharvalFilter = charcharvalTitle.map(id => `CHAR_CHARVALUE eq '${id}'`).join(' or ');
-         
-         that.oModel.read("/getPlannedOrdAnalysis", {
-             urlParameters: {
-                $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}' and ${charcharvalFilter})/groupby((CHAR_NUM,CHAR_VALUE),aggregate($count as Count))`,
-                     "$top": 100000
-                },
-                success:function(oData){
+            var charValList = that.byId("idCharValNum")
+            var listItems = charValList.getSelectedItems();
+            var charcharvalTitle = [];
+            listItems.forEach(i => {
+                charcharvalTitle.push(i.getTitle());
+            })
+            var selAllChk = that.byId("idCharacteristics").getSelectedItems();
 
-                 var charValList =  that.byId("idCharValNum")
-           var listItems = charValList.getSelectedItems();
+            const charcharvalFilter = charcharvalTitle.map(id => `CHAR_CHARVALUE eq '${id}'`).join(' or ');
+            if (selAllChk[0].getTitle() === "Select All" && selAllChk[0].getSelected() === true) {
+                var baseFilter = `LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}'`;
+
+            } else {
+                var baseFilter = `LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}'`;
+                baseFilter += ` and ${charcharvalFilter}`;
+            }
+
+
+            let sApply = `filter(${baseFilter})/groupby((CHAR_NUM,CHAR_VALUE),aggregate($count as Count))`;
+
+            that.oModel.read("/getPlannedOrdAnalysis", {
+                urlParameters: {
+                    $apply: sApply, "$top": 100000
+                },
+                success: function (oData) {
+                     if (oData.results.length === 0) {
+                this.showErrorMessage("No Data Found");
+                return;
+            }
+
+                    var charValList = that.byId("idCharValNum")
+                    var listItems = charValList.getSelectedItems();
                     var valData = [];
-                    oData.results.forEach(i=>{
+                    oData.results.forEach(i => {
                         var obj = {
-                            CHAR_NUM:i.CHAR_NUM,
-                            CHAR_VALUE:i.CHAR_VALUE
+                            CHAR_NUM: i.CHAR_NUM,
+                            CHAR_VALUE: i.CHAR_VALUE
                         }
                         valData.push(obj);
                     })
-                var selUniqs = that.byId("idUniqueID").getSelectedItems().map(x=>(JSON.parse(x.getText())))
-                  var  reqUniqs = selUniqs.length>0?selUniqs:that.byId("idUniqueID").getItems().map(y=>(JSON.parse(y.getText())))
-                //    if(listItems[0].getTitle() !== "Select All" ){
-            that.oModel.callFunction("/getPlannedOrderData",{
-                method:"GET",
-                urlParameters:{
-                    CHAR_DATA:JSON.stringify(valData),
-                    LOCATION_ID:selectedLocation,
-                    PRODUCT_ID:sSelectedProduct,
-                    CONFIG_PROD:sSelectedConfigProduct,
-                    MODEL_VERSION:aModelVersions,
-                    START_DATE:oStartDate,
-                    END_DATE:oEndDate,
-                    UNIQUE_ID:JSON.stringify(reqUniqs)
-                },
-                success:function(oData){
-                    var finData = JSON.parse(oData.getPlannedOrderData);
-                    that.chartfinData = finData;
-                    const unique = finData.map(id => `UNIQUE_ID eq ${JSON.parse(id.UNIQUE_ID)}`).join(' or ');
-                      that.oModel.read("/getCirGen", {
-                        urlParameters:{
-                $apply: `filter(LOCATION_ID eq '${selectedLocation}'  and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate} and WEEK_DATE le ${oEndDate}) and (${unique}))`,
-                "$top": 100000,
-
+                    var selUniqs = that.byId("idUniqueID").getSelectedItems().map(x => (JSON.parse(x.getText())))
+                    var reqUniqs = selUniqs.length > 0 ? selUniqs : that.byId("idUniqueID").getItems().map(y => (JSON.parse(y.getText())))
+                    //    if(listItems[0].getTitle() !== "Select All" ){
+                    that.oModel.callFunction("/getPlannedOrderData", {
+                        method: "GET",
+                        urlParameters: {
+                            CHAR_DATA: JSON.stringify(valData),
+                            LOCATION_ID: selectedLocation,
+                            PRODUCT_ID: sSelectedProduct,
+                            CONFIG_PROD: sSelectedConfigProduct,
+                            MODEL_VERSION: aModelVersions,
+                            START_DATE: oStartDate,
+                            END_DATE: oEndDate,
+                            UNIQUE_ID: JSON.stringify(reqUniqs)
                         },
-                // filters: aFilters,
-                success: function (oData) {
-                    var chart1Data = oData.results; 
-                      {
-                    // Build chart data (existing logic stays the same)
-                    var groupedData = {};
-                    chart1Data.forEach(function (item) {
-                        var productId = item.PRODUCT_ID;
-                        if (!groupedData[productId]) {
-                            groupedData[productId] = { Product: productId, Actual: 0, Forecast: 0 };
-                        }
-                        groupedData[productId].Actual += (item.ACTUAL_QTY || 0);
-                        groupedData[productId].Forecast += (item.UNCONSUMED_FORECAST || 0);
-                    });
+                        success: function (oData) {
+                            var finData = JSON.parse(oData.getPlannedOrderData);
+                                   if (finData.length === 0) {
+                this.showErrorMessage("No Data Found");
+                return;
+            }
+                            that.chartfinData = finData;
+                            const unique = finData.map(id => `UNIQUE_ID eq ${JSON.parse(id.UNIQUE_ID)}`).join(' or ');
+                            that.oModel.read("/getCirGen", {
+                                urlParameters: {
+                                    $apply: `filter(LOCATION_ID eq '${selectedLocation}'  and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate} and WEEK_DATE le ${oEndDate}) and (${unique}))`,
+                                    "$top": 100000,
 
-                    var aChartData = Object.values(groupedData);
-                    var oChartModel = new sap.ui.model.json.JSONModel({ chartData: aChartData });
-                    var oVizFrame = that.byId("idVizFrame");
-                    oVizFrame.setModel(oChartModel);
-                    // Configure the VizFrame for stacked bars
-                    var oDataset = new sap.viz.ui5.data.FlattenedDataset({
-                        dimensions: [{
-                            name: "Product",
-                            value: "{Product}"
-                        }],
-                        measures: [
-                            { name: "Forecast", value: "{Forecast}" },
-                            { name: "Actual", value: "{Actual}" }
-                        ],
-                        data: { path: "/chartData" }
-                    });
+                                },
+                                // filters: aFilters,
+                                success: function (oData) {
+                                    var chart1Data = oData.results;
+                                           if (chart1Data.length === 0) {
+                this.showErrorMessage("No Data Found");
+                return;
+            }
+                                    {
+                                        // Build chart data (existing logic stays the same)
+                                        var groupedData = {};
+                                        chart1Data.forEach(function (item) {
+                                            var productId = item.PRODUCT_ID;
+                                            if (!groupedData[productId]) {
+                                                groupedData[productId] = { Product: productId, Actual: 0, Forecast: 0 };
+                                            }
+                                            groupedData[productId].Actual += (item.ACTUAL_QTY || 0);
+                                            groupedData[productId].Forecast += (item.UNCONSUMED_FORECAST || 0);
+                                        });
 
-                    oVizFrame.setDataset(oDataset);
-                    oVizFrame.setVizType("stacked_bar"); // or "stacked_column" for vertical bars
-                    oVizFrame.removeAllFeeds();
+                                        var aChartData = Object.values(groupedData);
+                                        var oChartModel = new sap.ui.model.json.JSONModel({ chartData: aChartData });
+                                        var oVizFrame = that.byId("idVizFrame");
+                                        oVizFrame.setModel(oChartModel);
+                                        // Configure the VizFrame for stacked bars
+                                        var oDataset = new sap.viz.ui5.data.FlattenedDataset({
+                                            dimensions: [{
+                                                name: "Product",
+                                                value: "{Product}"
+                                            }],
+                                            measures: [
+                                                { name: "Forecast", value: "{Forecast}" },
+                                                { name: "Actual", value: "{Actual}" }
+                                            ],
+                                            data: { path: "/chartData" }
+                                        });
 
-                    // Add feeds
-                    oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "categoryAxis",
-                        type: "Dimension",
-                        values: ["Product"]
-                    }));
+                                        oVizFrame.setDataset(oDataset);
+                                        oVizFrame.setVizType("stacked_bar"); // or "stacked_column" for vertical bars
+                                        oVizFrame.removeAllFeeds();
 
-                    oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "valueAxis",
-                        type: "Measure",
-                        values: [ "Forecast","Actual"]
-                    }));
+                                        // Add feeds
+                                        oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
+                                            uid: "categoryAxis",
+                                            type: "Dimension",
+                                            values: ["Product"]
+                                        }));
 
-                    // Set properties with data labels
-                    oVizFrame.setVizProperties({
-                        plotArea: {
-                            isStacked: true,
-                            dataLabel: {
-                                visible: true,
-                                showTotal: true, // Shows total outside the bar
-                                formatString: "#,##0", // Number format
-                                style: {
-                                    color: "#333333",
-                                    fontSize: "11px"
+                                        oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
+                                            uid: "valueAxis",
+                                            type: "Measure",
+                                            values: ["Forecast", "Actual"]
+                                        }));
+
+                                        // Set properties with data labels
+                                        oVizFrame.setVizProperties({
+                                            plotArea: {
+                                                isStacked: true,
+                                                dataLabel: {
+                                                    visible: true,
+                                                    showTotal: true, // Shows total outside the bar
+                                                    formatString: "#,##0", // Number format
+                                                    style: {
+                                                        color: "#333333",
+                                                        fontSize: "11px"
+                                                    }
+                                                },
+                                                colorPalette: ["#FFC107", "#809e57"], // Yellow for Actual, Green for Forecast
+                                                dataPointStyle: {
+                                                    rules: [
+                                                        {
+                                                            dataContext: { Actual: "*" },
+                                                            properties: {
+                                                                color: "#FFC107"
+                                                            },
+                                                            displayName: "Actual"
+                                                        },
+                                                        {
+                                                            dataContext: { Forecast: "*" },
+                                                            properties: {
+                                                                color: "#809e57"
+                                                            },
+                                                            displayName: "Unconsumed"
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            valueAxis: {
+                                                label: {
+                                                    formatString: "#,##0"
+                                                },
+                                                title: {
+                                                    visible: true,
+                                                    text: "Quantity"
+                                                }
+                                            },
+                                            categoryAxis: {
+                                                title: {
+                                                    visible: true,
+                                                    text: "Product"
+                                                }
+                                            },
+                                            legend: {
+                                                visible: true,
+                                                title: {
+                                                    visible: false
+                                                }
+                                            },
+                                            title: {
+                                                visible: false,
+                                                text: "Actual vs Unconsumed"
+                                            },
+                                            interaction: {
+                                                selectability: {
+                                                    mode: "exclusive"
+                                                }
+                                            }
+
+                                        }),
+                                            console.log("CirGen chart loaded with", aChartData.length, "records");
+
+
+                                        //////////////////////////////////////
+                                        var groupedData = {};
+                                        var aAllCharValues = new Set();
+
+                                        finData.forEach(function (item) {
+                                            if (!item.CHAR_DESC || !item.CHAR_CHARVALUE || !item.YEAR_QUAETER) return;
+
+                                            aAllCharValues.add(item.CHAR_CHARVALUE);
+
+                                            var yearQuarter = item.YEAR_QUAETER;
+                                            var category = item.CHAR_DESC + " " + item.CHAR_CHARVALUE;
+                                            var key = yearQuarter + "|" + category;
+
+                                            if (!groupedData[key]) {
+                                                groupedData[key] = {
+                                                    YearQuarter: yearQuarter,
+                                                    Category: category,
+                                                    Sales: 0,
+                                                    Unconsumed: 0,
+                                                    Forecast: 0
+                                                };
+                                            }
+
+                                            groupedData[key].Sales += item.ACTUAL_QTY || 0;
+                                            groupedData[key].Unconsumed += item.UNCONSUMED_FORECAST || 0;
+                                            groupedData[key].Forecast += item.CIR_QTY || 0;
+                                        });
+
+                                        // --- Prepare chart data with combined label ---
+                                        var chartData = Object.values(groupedData).map(function (d) {
+                                            var total = d.Sales + d.Unconsumed;
+                                            return {
+                                                QuarterCharacteristic: d.YearQuarter + " | " + d.Category, // Combined label
+                                                Sales: d.Sales > 0 ? d.Sales : null,
+                                                Unconsumed: d.Unconsumed,
+                                                Forecast: d.Forecast,
+                                                Total: total
+                                            };
+                                        });
+
+                                        console.log("Chart data prepared:", chartData);
+
+                                        // --- Set up model and dataset ---
+                                        var oChartModel = new sap.ui.model.json.JSONModel({ CharData: chartData });
+                                        var oVizFrame = that.byId("idCharChart");
+
+                                        var oDataset = new sap.viz.ui5.data.FlattenedDataset({
+                                            dimensions: [
+                                                { name: "Quarter / Characteristic", value: "{QuarterCharacteristic}" }
+                                            ],
+                                            measures: [
+                                                { name: "Unconsumed", value: "{Unconsumed}" },
+                                                { name: "Sales", value: "{Sales}" },
+                                                { name: "Forecast", value: "{Forecast}" }
+                                            ],
+                                            data: { path: "/CharData" }
+                                        });
+
+                                        oVizFrame.setDataset(oDataset);
+                                        oVizFrame.setModel(oChartModel);
+                                        oVizFrame.removeAllFeeds();
+
+                                        // --- Feed items ---
+                                        oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
+                                            uid: "categoryAxis",
+                                            type: "Dimension",
+                                            values: ["Quarter / Characteristic"]
+                                        }));
+
+                                        oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
+                                            uid: "valueAxis",
+                                            type: "Measure",
+                                            values: ["Unconsumed", "Sales"]
+                                        }));
+
+                                        oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
+                                            uid: "valueAxis2",
+                                            type: "Measure",
+                                            values: ["Forecast"]
+                                        }));
+
+                                        oVizFrame.setVizType("dual_stacked_combination");
+
+                                        // --- Chart styling and properties ---
+                                        oVizFrame.setVizProperties({
+                                            plotArea: {
+                                                primaryScale: { fixedRange: false, minValue: 0 },
+                                                secondaryScale: { fixedRange: false, minValue: 0 },
+                                                dataLabel: { visible: true, showTotal: true, formatString: "#,##0" },
+                                                dataPointStyle: {
+                                                    rules: [
+                                                        {
+                                                            dataContext: { Unconsumed: "*" },
+                                                            properties: { color: "#809e57" },
+                                                            displayName: "Unconsumed"
+                                                        },
+                                                        {
+                                                            dataContext: { Sales: "*" },
+                                                            properties: { color: "#FFC107" },
+                                                            displayName: "Sales"
+                                                        },
+                                                        {
+                                                            dataContext: { Forecast: "*" },
+                                                            properties: { color: "#2196F3", lineColor: "#2196F3", lineWidth: 3 },
+                                                            displayName: "Forecast"
+                                                        }
+                                                    ]
+                                                },
+                                                dataShape: {
+                                                    primaryAxis: ["bar", "bar"],
+                                                    secondaryAxis: ["line"],
+                                                    isStacked: "true"
+                                                },
+                                                marker: { visible: true, size: 8 }
+                                            },
+                                            valueAxis: {
+                                                visible: true,
+                                                title: { visible: true, text: "Actual Quantities" },
+                                                label: { formatString: "#,##0" }
+                                            },
+                                            valueAxis2: {
+                                                visible: true,
+                                                title: { visible: true, text: "Forecast (CIR)" },
+                                                label: { formatString: "#,##0" }
+                                            },
+                                            categoryAxis: {
+                                                title: { visible: true, text: "Quarter | Characteristic" }
+                                            },
+                                            legend: {
+                                                visible: true,
+                                                title: { visible: false }
+                                            },
+                                            title: {
+                                                visible: false,
+                                                text: "Characteristics Value Analysis by Quarter"
+                                            },
+                                            interaction: {
+                                                selectability: { mode: "exclusive" }
+                                            }
+                                        });
+                                        that.loadForecastChart();
+                                        that.loadActualChart()
+
+                                        var charValLis = that.byId("idCharacteristics")
+                                        var charLis = that.byId("idCharValNum")
+                                        if(charLis.getSelectedItems()[0].getTitle() !=="Select All" && charLis.getSelectedItems()[0].getSelected() == true){
+                                            var charValLisItems = charLis.getSelectedItems().map(cv=> cv.getTitle());
+                                        }
+                                        const result = charValLisItems.map(str => {
+                                            const [CHAR, ...rest] = str.split(/-(.+)/);
+                                            const VAL = rest.length ? rest[0].trim() : "";
+                                            return {
+                                                CHAR: CHAR.trim(),
+                                                VAL,
+                                                CHAR_VAL: str.trim() // full original value
+                                            };
+                                        });
+                                        that.prev = result;
+                                        // console.log(result);
+
+
+                                    }
+
+                                },
+                                error: function (error) {
+
                                 }
-                            },
-                            colorPalette: ["#FFC107", "#809e57"], // Yellow for Actual, Green for Forecast
-                            dataPointStyle: {
-                                rules: [
-                                    {
-                                        dataContext: { Actual: "*" },
-                                        properties: {
-                                            color: "#FFC107"
-                                        },
-                                        displayName: "Actual"
-                                    },
-                                    {
-                                        dataContext: { Forecast: "*" },
-                                        properties: {
-                                            color: "#809e57"
-                                        },
-                                        displayName: "Unconsumed"
-                                    }
-                                ]
-                            }
+                            });
+
+                            // var selChars =  that.byId("idCharacteristics").getSelectedItems().filter(mv => mv.getTitle())
+                            // const chardescfil =that.byId("idCharacteristics").getSelectedItems().map(id => `CHAR_DESC eq '${id.getTitle()}'`).join(' or ');
+                            // const unique = unData.map(id => `UNIQUE_ID eq ${JSON.parse(id.UNIQUE_ID)}`).join(' or ');
+
+                            //         that.oModel.read("/getPlannedOrdAnalysis", {
+                            //  urlParameters: {
+                            //     $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}' and (${chardescfil} and (WEEK_DATE ge '${oStartDate}' and WEEK_DATE le '${oEndDate}') and (${unique}))`,
+                            //          "$top": 100000
+                            //     },
+                            //     success:function(oData){
+                            //         console.log(oData.results)
+                            //     },
+                            //     error:function(error){
+                            //         console.log(error)
+                            //     }
+                            // })
+
                         },
-                        valueAxis: {
-                            label: {
-                                formatString: "#,##0"
-                            },
-                            title: {
-                                visible: true,
-                                text: "Quantity"
-                            }
-                        },
-                        categoryAxis: {
-                            title: {
-                                visible: true,
-                                text: "Product"
-                            }
-                        },
-                        legend: {
-                            visible: true,
-                            title: {
-                                visible: false
-                            }
-                        },
-                        title: {
-                            visible: false,
-                            text: "Actual vs Unconsumed"
-                        },
-                        interaction: {
-                            selectability: {
-                                mode: "exclusive"
-                            }
+                        error: function (error) {
+                            console.log(error);
                         }
-
-                    }),
-                        console.log("CirGen chart loaded with", aChartData.length, "records");
-
-
-                        //////////////////////////////////////
-                        var groupedData = {};
-                    var aAllCharValues = new Set();
-
-                    finData.forEach(function (item) {
-                        if (!item.CHAR_DESC || !item.CHAR_CHARVALUE || !item.YEAR_QUAETER) return;
-
-                        aAllCharValues.add(item.CHAR_CHARVALUE);
-
-                        var yearQuarter = item.YEAR_QUAETER;
-                        var category = item.CHAR_DESC + " " + item.CHAR_CHARVALUE;
-                        var key = yearQuarter + "|" + category;
-
-                        if (!groupedData[key]) {
-                            groupedData[key] = {
-                                YearQuarter: yearQuarter,
-                                Category: category,
-                                Sales: 0,
-                                Unconsumed: 0,
-                                Forecast: 0
-                            };
-                        }
-
-                        groupedData[key].Sales += item.ACTUAL_QTY || 0;
-                        groupedData[key].Unconsumed += item.UNCONSUMED_FORECAST || 0;
-                        groupedData[key].Forecast += item.CIR_QTY || 0;
-                    });
-
-                    // --- Prepare chart data with combined label ---
-                    var chartData = Object.values(groupedData).map(function (d) {
-                        var total = d.Sales + d.Unconsumed;
-                        return {
-                            QuarterCharacteristic: d.YearQuarter + " | " + d.Category, // Combined label
-                            Sales: d.Sales > 0 ? d.Sales : null,
-                            Unconsumed: d.Unconsumed,
-                            Forecast: d.Forecast,
-                            Total: total
-                        };
-                    });
-
-                    console.log("Chart data prepared:", chartData);
-
-                    // --- Set up model and dataset ---
-                    var oChartModel = new sap.ui.model.json.JSONModel({ CharData: chartData });
-                    var oVizFrame = that.byId("idCharChart");
-
-                    var oDataset = new sap.viz.ui5.data.FlattenedDataset({
-                        dimensions: [
-                            { name: "Quarter / Characteristic", value: "{QuarterCharacteristic}" }
-                        ],
-                        measures: [
-                            { name: "Unconsumed", value: "{Unconsumed}" },
-                            { name: "Sales", value: "{Sales}" },
-                            { name: "Forecast", value: "{Forecast}" }
-                        ],
-                        data: { path: "/CharData" }
-                    });
-
-                    oVizFrame.setDataset(oDataset);
-                    oVizFrame.setModel(oChartModel);
-                    oVizFrame.removeAllFeeds();
-
-                    // --- Feed items ---
-                    oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "categoryAxis",
-                        type: "Dimension",
-                        values: ["Quarter / Characteristic"]
-                    }));
-
-                    oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "valueAxis",
-                        type: "Measure",
-                        values: ["Unconsumed", "Sales"]
-                    }));
-
-                    oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "valueAxis2",
-                        type: "Measure",
-                        values: ["Forecast"]
-                    }));
-
-                    oVizFrame.setVizType("dual_stacked_combination");
-
-                    // --- Chart styling and properties ---
-                    oVizFrame.setVizProperties({
-                        plotArea: {
-                            primaryScale: { fixedRange: false, minValue: 0 },
-                            secondaryScale: { fixedRange: false, minValue: 0 },
-                            dataLabel: { visible: true, showTotal: true, formatString: "#,##0" },
-                            dataPointStyle: {
-                                rules: [
-                                    {
-                                        dataContext: { Unconsumed: "*" },
-                                        properties: { color: "#809e57" },
-                                        displayName: "Unconsumed"
-                                    },
-                                    {
-                                        dataContext: { Sales: "*" },
-                                        properties: { color: "#FFC107" },
-                                        displayName: "Sales"
-                                    },
-                                    {
-                                        dataContext: { Forecast: "*" },
-                                        properties: { color: "#2196F3", lineColor: "#2196F3", lineWidth: 3 },
-                                        displayName: "Forecast"
-                                    }
-                                ]
-                            },
-                            dataShape: {
-                                primaryAxis: ["bar", "bar"],
-                                secondaryAxis: ["line"],
-                                isStacked:"true"
-                            },
-                            marker: { visible: true, size: 8 }
-                        },
-                        valueAxis: {
-                            visible: true,
-                            title: { visible: true, text: "Actual Quantities" },
-                            label: { formatString: "#,##0" }
-                        },
-                        valueAxis2: {
-                            visible: true,
-                            title: { visible: true, text: "Forecast (CIR)" },
-                            label: { formatString: "#,##0" }
-                        },
-                        categoryAxis: {
-                            title: { visible: true, text: "Quarter | Characteristic" }
-                        },
-                        legend: {
-                            visible: true,
-                            title: { visible: false }
-                        },
-                        title: {
-                            visible: false,
-                            text: "Characteristics Value Analysis by Quarter"
-                        },
-                        interaction: {
-                            selectability: { mode: "exclusive" }
-                        }
-                    });
-                    that.loadForecastChart();
-                    that.loadActualChart()
-
-                }
-                    
+                    })
+                    //    }
                 },
-                error:function(error){
-
+                error: function (error) {
+                    console.log(error);
                 }
             });
 
-                    // var selChars =  that.byId("idCharacteristics").getSelectedItems().filter(mv => mv.getTitle())
-                    // const chardescfil =that.byId("idCharacteristics").getSelectedItems().map(id => `CHAR_DESC eq '${id.getTitle()}'`).join(' or ');
-                    // const unique = unData.map(id => `UNIQUE_ID eq ${JSON.parse(id.UNIQUE_ID)}`).join(' or ');
-                    
-            //         that.oModel.read("/getPlannedOrdAnalysis", {
-            //  urlParameters: {
-            //     $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}' and (${chardescfil} and (WEEK_DATE ge '${oStartDate}' and WEEK_DATE le '${oEndDate}') and (${unique}))`,
-            //          "$top": 100000
-            //     },
-            //     success:function(oData){
-            //         console.log(oData.results)
-            //     },
-            //     error:function(error){
-            //         console.log(error)
-            //     }
-            // })
-  
-                },
-                error:function(error){
-                    console.log(error);
-                }
-            })
-        //    }
-                },
-                error:function(error){
-                    console.log(error);
-                } 
-            });
-                
         },
 
 
@@ -3385,10 +3339,10 @@ console.log("")
 
             // --- Unique ID filter ---
             var aKeys = [];
-            this.byId("idUniqueID").getItems().forEach(y=>{
-                               aKeys.push( y.getText())
-                            });
-               var selUID = this.byId("idUniqueID").getSelectedKeys();             
+            this.byId("idUniqueID").getItems().forEach(y => {
+                aKeys.push(y.getText())
+            });
+            var selUID = this.byId("idUniqueID").getSelectedKeys();
             // var oUniqueIds = selUID.length > 0 ? selUID : aKeys;
             var oUniqueIds = selUID;
             if (oUniqueIds.length > 0) {
@@ -3589,21 +3543,21 @@ console.log("")
             var oStartDate = this.byId("DRS1").getDateValue();
             var oEndDate = this.byId("DRS1").getSecondDateValue();
             var uniqueID = this.byId("idUniqueID");
-            var  uniqueIdF = uniqueID.getSelectedItems().length > 0 ? uniqueID.getSelectedItems().map(y=>{ return y.getText()}):uniqueID.getItems().map(x=>{return x.getText()})
+            var uniqueIdF = uniqueID.getSelectedItems().length > 0 ? uniqueID.getSelectedItems().map(y => { return y.getText() }) : uniqueID.getItems().map(x => { return x.getText() })
 
             // var charvallist = this.byId("idCharValNum")
             var fData = this.chartfinData;
-            if(fData){
-                if(fData.length>0){
-             const uniqueIDs1 = [...new Set(fData.map(item => item.UNIQUE_ID))];
-             var uniqueIdF = uniqueIDs1
+            if (fData) {
+                if (fData.length > 0) {
+                    const uniqueIDs1 = [...new Set(fData.map(item => item.UNIQUE_ID))];
+                    var uniqueIdF = uniqueIDs1
+                }
             }
-        }
 
             // Get all Unique IDs from the dropdown (not just selected ones)
             var oUniqueIDModel = this.getView().getModel("dependentModel");
             var aAllUniqueIDs = oUniqueIDModel ? (oUniqueIDModel.getProperty("/UniqueIDs") || []) : [];
-            var totUniq = this.byId("idUniqueID").getItems().map(i=>{
+            var totUniq = this.byId("idUniqueID").getItems().map(i => {
                 return i.getText()
             })
             // if (aAllUniqueIDs.length === 0) {
@@ -3649,7 +3603,7 @@ console.log("")
 
                     // Group by WEEK_DATE and ASSEMBLY_DESC to aggregate CIR_QTY and COUNT
                     var groupedData = {};
-                    var Data = oData.results.length >0 ? oData.results:that.data;
+                    var Data = oData.results.length > 0 ? oData.results : that.data;
                     // oData.results.forEach(function (item) {
 
                     var groupedData = {};
@@ -3737,6 +3691,11 @@ console.log("")
                         },
                         categoryAxis: {
                             title: { visible: true, text: "Week Date" }
+                        }, tooltip: {
+                            visible: true,
+                            formatString: "#,##0"
+                        }, interaction: {
+                            behaviorType: "automatic"
                         },
                         legend: {
                             visible: true
@@ -3822,7 +3781,18 @@ console.log("")
 
 
         // Add this function to your controller
-
+        onClear: function () {
+            that.byId("idLocation").setSelectedKey("");
+            that.byId("idConfigProduct").setSelectedKey();
+            that.byId("idProduct").setSelectedKey();
+            that.byId("idUniqueID").setSelectedKeys([]);
+            that.byId("idModelVersion").setSelectedKeys([]);
+            const oToday = new Date();
+            const oDateL = new Date(oToday.getFullYear(), oToday.getMonth(), 1);
+            const oDateH = new Date(oDateL.getFullYear(), oDateL.getMonth() + 3, 0);
+            that.byId("DRS1").setDateValue(oDateL);
+            that.byId("DRS1").setSecondDateValue(oDateH);
+        },
         loadActualChart: function () {
             var oModel = this.getView().getModel();
             var sLocation = this.byId("idLocation").getSelectedKey();
@@ -3830,17 +3800,17 @@ console.log("")
             var sProduct = this.byId("idProduct").getSelectedKey();
             var oStartDate = this.byId("DRS1").getDateValue();
             var oEndDate = this.byId("DRS1").getSecondDateValue();
-               var uniqueID = this.byId("idUniqueID");
-            var  uniqueIdF = uniqueID.getSelectedItems().length > 0 ? uniqueID.getSelectedItems().map(y=>{ return y.getText()}):uniqueID.getItems().map(x=>{return x.getText()})
+            var uniqueID = this.byId("idUniqueID");
+            var uniqueIdF = uniqueID.getSelectedItems().length > 0 ? uniqueID.getSelectedItems().map(y => { return y.getText() }) : uniqueID.getItems().map(x => { return x.getText() })
 
 
-              var fData = this.chartfinData;
-            if(fData){
-                if(fData.length>0){
-             const uniqueIDs1 = [...new Set(fData.map(item => item.UNIQUE_ID))];
-             var uniqueIdF = uniqueIDs1
+            var fData = this.chartfinData;
+            if (fData) {
+                if (fData.length > 0) {
+                    const uniqueIDs1 = [...new Set(fData.map(item => item.UNIQUE_ID))];
+                    var uniqueIdF = uniqueIDs1
+                }
             }
-        }
             // Get all Unique IDs from the dropdown (not just selected ones)
             var oUniqueIDModel = this.getView().getModel("dependentModel");
             var aAllUniqueIDs = oUniqueIDModel ? (oUniqueIDModel.getProperty("/UniqueIDs") || []) : [];
@@ -3878,7 +3848,7 @@ console.log("")
             oModel.read("/getAsmbReqAnalysis", {
                 // filters: aFilters,
                 urlParameters: {
-                      $apply: `filter(LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique}))/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`,
+                    $apply: `filter(LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique}))/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`,
                     // "$select": "WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT",
                     "$top": 100000
                 },
@@ -3887,9 +3857,9 @@ console.log("")
 
                     // Group by WEEK_DATE and ASSEMBLY_DESC to aggregate ACTUAL_QTY and COUNT
                     var groupedData = {};
-                     var Data = oData.results.length >0 ? oData.results:that.data;
+                    var Data = oData.results.length > 0 ? oData.results : that.data;
 
-                     var groupedData = {};
+                    var groupedData = {};
 
                     Data.forEach(function (item) {
                         // Skip if WEEK_DATE is missing
@@ -4101,7 +4071,7 @@ console.log("")
                 ModelVersions: modelVersions,
                 UniqueIDs: uniqueIDs
             });
-            this.byId("idProduct").setBusy(false);
+            // this.byId("idProduct").setBusy(false);
 
 
             // Clear previous selections
