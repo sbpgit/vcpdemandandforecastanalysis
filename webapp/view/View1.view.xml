@@ -1,5 +1,5 @@
 <mvc:View controllerName="vcp.vcpdemandandforecastanalysis.controller.View1"
-   xmlns:mvc="sap.ui.core.mvc"
+    xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns="sap.m"
     xmlns:viz="sap.viz.ui5.controls"
@@ -131,6 +131,29 @@
                                     <core:Item
                                         key="{UNIQUE_ID}"
                                         text="{UNIQUE_ID}"
+                                    />
+                                </MultiComboBox>
+                            </fb:control>
+                        </fb:FilterGroupItem>
+
+                        <fb:FilterGroupItem
+                            name="Asseembly"
+                            label="Assembly"
+                            groupName="Group1"
+                            visibleInFilterBar="true"
+                        >
+                            <fb:control>
+                                <MultiComboBox
+                                    id="idAssembly"
+                                    items="{path: 'asmbModel>/items'}"
+                                    showSelectAll="true"
+                                    selectionChange=".onAssemblyChange"
+                                    
+
+                                >
+                                    <core:Item
+                                        key="{asmbModel>ASSEMBLY_DESCRIPTION}"
+                                        text="{asmbModel>ASSEMBLY_DESCRIPTION}"
                                     />
                                 </MultiComboBox>
                             </fb:control>
@@ -326,6 +349,7 @@
                                     mode="MultiSelect"
                                     items="{charModel>/Characteristics}"
                                     selectionChange="onCharacteristicChange"
+                                    rememberSelections="true"
                                     
                                 >
                                     <StandardListItem
@@ -355,6 +379,7 @@
                                     mode="MultiSelect"
                                     items="{/CharValNum}"
                                     selectionChange="onCharValueChange"
+                                    rememberSelections="true"
                                 >
                                     <StandardListItem title="{text}" description="{char}" />
                                 </List>
