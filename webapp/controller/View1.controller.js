@@ -1,4 +1,5 @@
 
+
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/odata/v2/ODataModel",
@@ -89,6 +90,12 @@ sap.ui.define([
             // 3️⃣ Set these as range in DateRangeSelection (DRS1)
             that.byId("DRS1").setDateValue(oDateL);
             that.byId("DRS1").setSecondDateValue(oDateH);
+
+            var oMultiComboBox = that.byId("idAssembly");
+            oMultiComboBox.onBeforeOpen = function () {
+                 sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBox, arguments);
+                that.onOpenAsmb(); // Call your custom function
+            }.bind(that);
 
             //  if (that.prev.length > 0) {
             //                     var cvlists = that.byId("idCharValNum");
@@ -353,7 +360,6 @@ sap.ui.define([
                 $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}')/groupby((MODEL_VERSION,UNIQUE_ID),aggregate($count as Count))`
             });
 
-
             const modelVersions = Array.from(
                 new Set(modelVData.map(item => item.MODEL_VERSION))
             ).map(version => ({ MODEL_VERSION: version }));
@@ -373,6 +379,65 @@ sap.ui.define([
             // this.checkAndAutoSelect();
 
 
+        },
+        onOpenAsmb: async function(oEvent){
+
+                var selectedLocation = that.byId("idLocation").getSelectedKey();
+            var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
+            var sSelectedProduct =that.byId("idProduct").getSelectedKey();
+            var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            // console.log("Selected Product:", sSelectedProduct);
+
+            const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
+            const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+            var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}'`;
+
+            if (sSelectModelVersion.length > 0) {
+                baseFilter += ` and (${modVer})`;
+            }
+            if (sSelectUniqueId.length > 0) {
+                baseFilter += ` and (${unique})`;
+            }
+                
+
+
+            let sApply = `filter(${baseFilter})/groupby((ASSEMBLY_DESCRIPTION))`;
+              const asmbData = await that.readModel("getAsmbReqAnalysis", {
+                $apply: sApply,
+                $top:100000,
+            });
+                 var oMultiComboBox = that.byId("idAssembly");
+                var asmbModel = new JSONModel({items:asmbData});
+                    // that.byId("idAssembly").setModel(asmbData);
+                    
+                    oMultiComboBox.setModel(asmbModel, "asmbModel");
+
+                    // Make sure MultiComboBox is bound to correct path
+                   
+                    oMultiComboBox.bindItems({
+                        path: "asmbModel>/items",  // Path must not be undefined
+                        template: new sap.ui.core.Item({
+                            key: "{asmbModel>ASSEMBLY_DESCRIPTION}",
+                            text: "{asmbModel>ASSEMBLY_DESCRIPTION}"
+                        })
+                    });
+
+            // that.oModel.read("getAsmbReqAnalysis", {
+            //     $apply: sApply,
+            //     $top: 100000,
+            //     success: function (oData) {
+            //         // var asmbData = oData.results;
+
+                
+            //     },
+            //     error:function(error){
+
+            //     }
+            // });
+           
+            // that.getView().setModel(asmbModel, "asmbModel");
+            // console.log(asmbData);
         },
 
         // NEW: Method to check mandatory fields and auto-select Model Version & Unique IDs
@@ -738,7 +803,7 @@ sap.ui.define([
             console.log("")
         },
 
-        onApplyFilters: function (oEvent) {
+        onApplyFilters: async function (oEvent) {
             var oView = this.getView();
 
             // Collect mandatory values
@@ -762,6 +827,43 @@ sap.ui.define([
             var that = this;
             var oModel = this.getView().getModel();
             var oUniqueIDBox = this.byId("idUniqueID");
+
+            var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var sAsmb =  that.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            // console.log("Selected Product:", sSelectedProduct);
+            if(sAsmb.length>0){
+                
+            
+            const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
+            const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+             const asmb = sAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+            var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
+
+            if (sSelectModelVersion.length > 0) {
+                baseFilter += ` and (${modVer})`;
+            }
+            if (sSelectUniqueId.length > 0) {
+                baseFilter += ` and (${unique})`;
+            }
+            if(sAsmb.length > 0 ){
+                baseFilter += ` and (${asmb})`;
+            }
+                
+
+
+            let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID))`;
+              const asmbData = await that.readModel("getAsmbReqAnalysis", {
+                $apply: sApply,
+                $top:100000,
+            });
+            that.asmbFData = asmbData
+            if(that.asmbFData.lenght == 0 ){
+                that.showErrorMessage("No Data Found on Selected Filters");
+                that.showBusyIndicator(false);
+                return;
+            }
+        }
 
             // 🔹 STEP 1: Refresh Unique IDs for selected product before fetching charts
             oModel.read("/getCirGen", {
@@ -796,16 +898,26 @@ sap.ui.define([
                         // }
 
                         // 🔹 Select all unique IDs automatically
-                        var selUID = that.byId("idUniqueID").getSelectedKeys()
+
                         var aKeys = [];
-                        if (selUID.length == 0 || oView.byId("idUniqueID").getSelectAllCheckbox().getSelected() === true) {
-                            oView.byId("idUniqueID").getItems().forEach(y => {
-                                aKeys.push(y.getText())
+
+                        if (sAsmb.length > 0 && that.asmbFData.length > 0) {
+                            that.asmbFData.forEach(y => {
+                                aKeys.push(y.UNIQUE_ID);
                             })
+                        } else {
+                            var selUID = that.byId("idUniqueID").getSelectedKeys()
+
+                            if (selUID.length == 0 || oView.byId("idUniqueID").getSelectAllCheckbox().getSelected() === true) {
+                                oView.byId("idUniqueID").getItems().forEach(y => {
+                                    aKeys.push(y.getText())
+                                })
+                            }
+                            else {
+                                aKeys = selUID;
+                            }
                         }
-                        else {
-                            aKeys = selUID;
-                        }
+                        
 
                         // selUID.forEach(x=>{
                         //     aUniqueIDs.push({UNIQUE_ID:x})
@@ -2704,6 +2816,14 @@ sap.ui.define([
             //     console.log("⚠️  _loadCharacteristicValues already in progress, skipping");
             //     return;
             // }
+            
+              var sLocationId = this.byId("idLocation").getSelectedKey();
+            var sSelectedConfigProduct = this.byId("idConfigProduct").getSelectedKey();
+            var aSelectedConfigProducts = sSelectedConfigProduct ? [sSelectedConfigProduct] : [];
+            var sProducts = this.byId("idProduct").getSelectedKey();
+            var aProducts = sProducts ? [sProducts] : [];
+            var aModelVersions = this.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            aModelVersions = aModelVersions.length == 0 ? '' : aModelVersions;
 
             var oCharValList = this.byId("idCharValNum");
             var oModel = this.getView().getModel();
@@ -2728,7 +2848,8 @@ sap.ui.define([
             oModel.read("/getPlannedOrdAnalysis", {
                 // filters: aFilters,
                 urlParameters: {
-                    $apply: `filter(${charDescFilter})/groupby((CHAR_DESC,CHAR_CHARVALUE))`,
+                    $apply: `filter(LOCATION_ID eq '${sLocationId}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sProducts}' and (${charDescFilter}))/groupby((CHAR_DESC,CHAR_CHARVALUE))`,
+                    //`filter(${charDescFilter})/groupby((CHAR_DESC,CHAR_CHARVALUE))`,
                     // "$select": "CHAR_DESC,CHAR_CHARVALUE",
                     "$top": 100000
                 },
@@ -3801,7 +3922,7 @@ sap.ui.define([
             var oEndDate = this.byId("DRS1").getSecondDateValue();
             var uniqueID = this.byId("idUniqueID");
             var uniqueIdF = uniqueID.getSelectedItems().length > 0 ? uniqueID.getSelectedItems().map(y => { return y.getText() }) : uniqueID.getItems().map(x => { return x.getText() })
-
+              var oAsmb = this.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             // var charvallist = this.byId("idCharValNum")
             var fData = this.chartfinData;
             if (fData) {
@@ -3844,14 +3965,19 @@ sap.ui.define([
                 }));
             }
             const unique = uniqueIdF.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+
+            var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique})`;
+            
+            if(oAsmb.length>0){
+            const asm = oAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+             baseFilter += ` and (${asm})`;
+            }
             var that = this;
+             let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`;
 
-            // Read data from getAsmbReqAnalysis
             oModel.read("/getAsmbReqAnalysis", {
-                // filters: aFilters,
                 urlParameters: {
-                    $apply: `filter(LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique}))/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`,
-
+                    $apply: sApply, //`filter(LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique}))/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`,
                     // "$select": "WEEK_DATE,ASSEMBLY_DESC,CIR_QTY,COUNT",
                     "$top": 100000
                 },
@@ -4059,6 +4185,7 @@ sap.ui.define([
             var oEndDate = this.byId("DRS1").getSecondDateValue();
             var uniqueID = this.byId("idUniqueID");
             var uniqueIdF = uniqueID.getSelectedItems().length > 0 ? uniqueID.getSelectedItems().map(y => { return y.getText() }) : uniqueID.getItems().map(x => { return x.getText() })
+            var oAsmb = this.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
 
 
             var fData = this.chartfinData;
@@ -4099,13 +4226,23 @@ sap.ui.define([
                 }));
             }
             const unique = uniqueIdF.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+
+             var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique})`;
+            
+            if(oAsmb.length>0){
+            const asm = oAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+             baseFilter += ` and (${asm})`;
+            }
+            var that = this;
+             let sApply = `filter(${baseFilter})/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`;
+
             var that = this;
 
             // Read data from getAsmbReqAnalysis
             oModel.read("/getAsmbReqAnalysis", {
                 // filters: aFilters,
                 urlParameters: {
-                    $apply: `filter(LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique}))/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`,
+                    $apply: sApply,//`filter(LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique}))/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`,
                     // "$select": "WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT",
                     "$top": 100000
                 },
@@ -5228,5 +5365,7 @@ sap.ui.define([
     });
 });
 
+
 /////////redeploy 29-10-2025////
+///////// Assembly Fields 30-10-2025//////////////
 
