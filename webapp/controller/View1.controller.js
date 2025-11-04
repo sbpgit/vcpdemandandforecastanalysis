@@ -1,5 +1,3 @@
-
-
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/odata/v2/ODataModel",
@@ -24,6 +22,7 @@ sap.ui.define([
             that.oModel = that.getOwnerComponent().getModel("oModel");
             that.data = []
             that.prev = [];
+            that.applyFilterData = [];
 
 
             // try {
@@ -91,10 +90,20 @@ sap.ui.define([
             that.byId("DRS1").setDateValue(oDateL);
             that.byId("DRS1").setSecondDateValue(oDateH);
 
-            var oMultiComboBox = that.byId("idAssembly");
-            oMultiComboBox.onBeforeOpen = function () {
-                 sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBox, arguments);
-                that.onOpenAsmb(); // Call your custom function
+             var oMultiComboBoxMRPG = that.byId("idMRPG");
+            oMultiComboBoxMRPG.onBeforeOpen = function () {
+                 sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxMRPG, arguments);
+                that.onOpenMRPG();
+            }.bind(that);
+             var oMultiComboBoxMRPT= that.byId("idMRPT");
+            oMultiComboBoxMRPT.onBeforeOpen = function () {
+                 sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxMRPT, arguments);
+                that.onOpenMRPT();
+            }.bind(that);
+            var oMultiComboBoxAsmb = that.byId("idAssembly");
+            oMultiComboBoxAsmb.onBeforeOpen = function () {
+                 sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxAsmb, arguments);
+                that.onOpenAsmb();
             }.bind(that);
 
             //  if (that.prev.length > 0) {
@@ -175,6 +184,7 @@ sap.ui.define([
             that.byId("idProduct").setSelectedKey();
             that.byId("idUniqueID").setSelectedKeys([]);
             that.byId("idModelVersion").setSelectedKeys([]);
+            
             const oToday = new Date();
             const oDateL = new Date(oToday.getFullYear(), oToday.getMonth(), 1);
             const oDateH = new Date(oDateL.getFullYear(), oDateL.getMonth() + 3, 0);
@@ -380,24 +390,226 @@ sap.ui.define([
 
 
         },
-        onOpenAsmb: async function(oEvent){
 
-                var selectedLocation = that.byId("idLocation").getSelectedKey();
+        onOpenMRPG: async function(oEvent){
+            
+            var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
             var sSelectedProduct =that.byId("idProduct").getSelectedKey();
             var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
-            var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var oStartDate = this.byId("DRS1").getDateValue();
+            var oEndDate = this.byId("DRS1").getSecondDateValue();
+             var uniques = [];
+            if (that.applyFilterData.length > 0) {
+                that.applyFilterData.forEach(x => {
+                    uniques.push(x.UNIQUE_ID)
+                })
+                var sSelectUniqueId = [...new Set(uniques)];
+            }
+            else {
+                var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            }
             // console.log("Selected Product:", sSelectedProduct);
 
             const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
             const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
-            var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}'`;
+            var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
 
             if (sSelectModelVersion.length > 0) {
                 baseFilter += ` and (${modVer})`;
             }
             if (sSelectUniqueId.length > 0) {
                 baseFilter += ` and (${unique})`;
+            }
+                
+            //  that.oModel.callFunction("/getPlannedOrderData", {
+            //                     method: "GET",
+            //                     urlParameters: {
+            //                         CHAR_DATA: JSON.stringify(valData),
+            //                         LOCATION_ID: selectedLocation,
+            //                         PRODUCT_ID: sSelectedProduct,
+            //                         CONFIG_PROD: sSelectedConfigProduct,
+            //                         MODEL_VERSION: aModelVersions,
+            //                         START_DATE: oStartDate,
+            //                         END_DATE: oEndDate,
+            //                         UNIQUE_ID: JSON.stringify(reqUniqs)
+            //                     },
+            //                     success: function (oData) {
+            //                          },
+            //                             error: function (error) {
+            //                                  console.log(error);
+            //                         that.showBusyIndicator(false);
+            //                         that.showErrorMessage(error);
+
+            //                             }
+            //                         });
+
+            let sApply = `filter(${baseFilter})/groupby((MRP_GROUP))`;
+              const mrpgData = await that.readModel("getAsmbReqAnalysis", {
+                $apply: sApply,
+                $top:100000,
+            });
+                 mrpgData.forEach(x=>{
+                    if(x.MRP_GROUP == null){
+                        x.MRP_GROUP = "null";
+                    }
+                })
+                mrpgData.sort((a, b) => {
+  const valA = (a.MRP_GROUP || '').toString();
+  const valB = (b.MRP_GROUP || '').toString();
+  return valA.localeCompare(valB);
+});
+                 var oMultiComboBox = that.byId("idMRPG");
+                var mrpgModel = new JSONModel({items:mrpgData});
+                    // that.byId("idAssembly").setModel(asmbData);
+                    
+                    oMultiComboBox.setModel(mrpgModel, "mrpgModel");
+
+                    // Make sure MultiComboBox is bound to correct path
+                   
+                    oMultiComboBox.bindItems({
+                        path: "mrpgModel>/items",  // Path must not be undefined
+                        template: new sap.ui.core.Item({
+                            key: "{mrpgModel>MRP_GROUP}",
+                            text: "{mrpgModel>MRP_GROUP}"
+                        })
+                    });
+        },
+        onOpenMRPT:async function(oEvent){
+
+                var selectedLocation = that.byId("idLocation").getSelectedKey();
+            var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
+            var sSelectedProduct =that.byId("idProduct").getSelectedKey();
+            var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var oStartDate = this.byId("DRS1").getDateValue();
+            var oEndDate = this.byId("DRS1").getSecondDateValue();
+            var uniques = [];
+            if (that.applyFilterData.length > 0) {
+                that.applyFilterData.forEach(x => {
+                    uniques.push(x.UNIQUE_ID)
+                })
+                var sSelectUniqueId = [...new Set(uniques)];
+            }
+            else {
+                var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            }
+            var sSelectMRPG = that.byId("idMRPG").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            // console.log("Selected Product:", sSelectedProduct);
+
+            const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
+            const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+            const mrpg = sSelectMRPG.map(id => {
+                if (id === null || id === 'null') {
+                    return `MRP_GROUP eq null`; // only null
+                }else {
+                    return `MRP_GROUP eq '${id}'`; // normal value
+                }
+            })
+                .join(' or ');
+
+            var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
+
+            if (sSelectModelVersion.length > 0) {
+                baseFilter += ` and (${modVer})`;
+            }
+            if (sSelectUniqueId.length > 0) {
+                baseFilter += ` and (${unique})`;
+            }
+            if(sSelectMRPG.length>0){
+                 baseFilter += ` and (${mrpg})`;
+            }
+
+            let sApply = `filter(${baseFilter})/groupby((MRP_TYPE))`;
+              const mrptData = await that.readModel("getAsmbReqAnalysis", {
+                $apply: sApply,
+                $top:100000,
+            });
+                mrptData.forEach(x=>{
+                    if(x.MRP_TYPE == null){
+                        x.MRP_TYPE = "null";
+                    }
+                })
+                mrptData.sort((a, b) => {
+  const valA = (a.MRP_TYPE || '').toString();
+  const valB = (b.MRP_TYPE || '').toString();
+  return valA.localeCompare(valB);
+});
+                 var oMultiComboBox = that.byId("idMRPT");
+                var mrptModel = new JSONModel({items:mrptData});
+                    // that.byId("idAssembly").setModel(asmbData);
+                    
+                    oMultiComboBox.setModel(mrptModel, "mrptModel");
+
+                    // Make sure MultiComboBox is bound to correct path
+                   
+                    oMultiComboBox.bindItems({
+                        path: "mrptModel>/items",  // Path must not be undefined
+                        template: new sap.ui.core.Item({
+                            key: "{mrptModel>MRP_TYPE}",
+                            text: "{mrptModel>MRP_TYPE}"
+                        })
+                    });
+
+        },
+        onOpenAsmb: async function(oEvent){
+
+                var selectedLocation = that.byId("idLocation").getSelectedKey();
+            var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
+            var sSelectedProduct =that.byId("idProduct").getSelectedKey();
+            var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var oStartDate = this.byId("DRS1").getDateValue();
+            var oEndDate = this.byId("DRS1").getSecondDateValue();
+            var uniques = [];
+            if (that.applyFilterData.length > 0) {
+                that.applyFilterData.forEach(x => {
+                    uniques.push(x.UNIQUE_ID)
+                })
+                var sSelectUniqueId = [...new Set(uniques)];
+            }
+            else {
+                var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            }
+            var sSelectMRPG = that.byId("idMRPG").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var sSelectMRPT = that.byId("idMRPT").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            // console.log("Selected Product:", sSelectedProduct);
+
+            const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
+            const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+            const mrpg = sSelectMRPG.map(id => {
+                if (id === null || id === 'null') {
+                    return `MRP_GROUP eq null`; // only null
+                } else if (id === '') {
+                    return `MRP_GROUP eq ''`; // only empty string
+                } else {
+                    return `MRP_GROUP eq '${id}'`; // normal value
+                }
+            })
+                .join(' or ');
+
+            const mrpt = sSelectMRPT.map(id => {
+                if (id === null || id === 'null') {
+                    return `MRP_TYPE eq null`; // only null
+                } else if (id === '') {
+                    return `MRP_TYPE eq ''`; // only empty string
+                } else {
+                    return `MRP_TYPE eq '${id}'`; // normal value
+                }
+            })
+                .join(' or ');
+
+            var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
+
+            if (sSelectModelVersion.length > 0) {
+                baseFilter += ` and (${modVer})`;
+            }
+            if (sSelectUniqueId.length > 0) {
+                baseFilter += ` and (${unique})`;
+            }
+               if(sSelectMRPG.length>0){
+                 baseFilter += ` and (${mrpg})`;
+            }
+               if(sSelectMRPG.length>0){
+                 baseFilter += ` and (${mrpt})`;
             }
                 
 
@@ -408,6 +620,11 @@ sap.ui.define([
                 $top:100000,
             });
                  var oMultiComboBox = that.byId("idAssembly");
+                 asmbData.sort((a, b) => {
+  const valA = (a.ASSEMBLY_DESCRIPTION || '').toString();
+  const valB = (b.ASSEMBLY_DESCRIPTION || '').toString();
+  return valA.localeCompare(valB);
+});
                 var asmbModel = new JSONModel({items:asmbData});
                     // that.byId("idAssembly").setModel(asmbData);
                     
@@ -422,24 +639,95 @@ sap.ui.define([
                             text: "{asmbModel>ASSEMBLY_DESCRIPTION}"
                         })
                     });
-
-            // that.oModel.read("getAsmbReqAnalysis", {
-            //     $apply: sApply,
-            //     $top: 100000,
-            //     success: function (oData) {
-            //         // var asmbData = oData.results;
-
-                
-            //     },
-            //     error:function(error){
-
-            //     }
-            // });
-           
-            // that.getView().setModel(asmbModel, "asmbModel");
-            // console.log(asmbData);
         },
 
+        onMRPFilters:function(){
+              
+            that.showBusyIndicator(true);
+            var selectedLocation = that.byId("idLocation").getSelectedKey();
+            var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
+            var sSelectedProduct =that.byId("idProduct").getSelectedKey();
+            var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var oStartDate = this.byId("DRS1").getDateValue();
+            var oEndDate = this.byId("DRS1").getSecondDateValue();
+             var uniques = [];
+            if (that.applyFilterData.length > 0) {
+                that.applyFilterData.forEach(x => {
+                    uniques.push(x.UNIQUE_ID)
+                })
+                var sSelectUniqueId = [...new Set(uniques)];
+            }
+            else {
+                var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            }
+            var sSelectMRPG = that.byId("idMRPG").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var sSelectMRPT = that.byId("idMRPT").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+              var sSelectAssembly = that.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            // console.log("Selected Product:", sSelectedProduct);
+
+            const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
+            const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+             const mrpg = sSelectMRPG.map(id => {
+                if (id === null || id === 'null') {
+                    return `MRP_GROUP eq null`; // only null
+                } else if (id === '') {
+                    return `MRP_GROUP eq ''`; // only empty string
+                } else {
+                    return `MRP_GROUP eq '${id}'`; // normal value
+                }
+            })
+                .join(' or ');
+
+            const mrpt = sSelectMRPT.map(id => {
+                if (id === null || id === 'null') {
+                    return `MRP_TYPE eq null`; // only null
+                } else if (id === '') {
+                    return `MRP_TYPE eq ''`; // only empty string
+                } else {
+                    return `MRP_TYPE eq '${id}'`; // normal value
+                }
+            })
+                .join(' or ');
+            const asmb = sSelectAssembly.map(id =>`ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+            var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
+
+            if (sSelectModelVersion.length > 0) {
+                baseFilter += ` and (${modVer})`;
+            }
+            if (sSelectUniqueId.length > 0) {
+                baseFilter += ` and (${unique})`;
+            }
+              if(sSelectMRPG.length>0){
+                 baseFilter += ` and (${mrpg})`;
+            }
+               if(sSelectMRPG.length>0){
+                 baseFilter += ` and (${mrpt})`;
+            }
+               if(sSelectAssembly.length>0){
+                 baseFilter += ` and (${asmb})`;
+            }
+            that.loadForecastChartMRP(baseFilter);
+            that.loadActualChartMRP(baseFilter);
+
+        },
+        mrpClear: function () {
+            that.byId("idMRPG").setSelectedKeys([]);
+            that.byId("idMRPT").setSelectedKeys([]);
+            that.byId("idAssembly").setSelectedKeys([]);
+
+                var oForecastChart = this.byId("idForecastChart");
+            if (oForecastChart) {
+                oForecastChart.setModel(new sap.ui.model.json.JSONModel({ ForecastChartData: [] }));
+            }
+
+            // Clear Actual chart
+            var oActualChart = this.byId("idActualChart");
+            if (oActualChart) {
+                oActualChart.setModel(new sap.ui.model.json.JSONModel({ ActualChartData: [] }));
+            }
+
+
+        },
         // NEW: Method to check mandatory fields and auto-select Model Version & Unique IDs
         checkAndAutoSelect: function () {
             var sLocation = this.byId("idLocation").getSelectedKey();
@@ -804,6 +1092,11 @@ sap.ui.define([
         },
 
         onApplyFilters: async function (oEvent) {
+            if(this.byId("idLocation").getSelectedKey().length == 0 ){
+                // that.showErrorMessage("Mandatory Fields not Selected");
+                that.showBusyIndicator(false);
+                return;
+            }
             var oView = this.getView();
 
             // Collect mandatory values
@@ -827,43 +1120,43 @@ sap.ui.define([
             var that = this;
             var oModel = this.getView().getModel();
             var oUniqueIDBox = this.byId("idUniqueID");
-
+            that.prev = [];
             var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
-            var sAsmb =  that.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            // var sAsmb =  that.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             // console.log("Selected Product:", sSelectedProduct);
-            if(sAsmb.length>0){
+        //     if(sAsmb.length>0){
                 
             
-            const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
-            const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
-             const asmb = sAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
-            var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
+        //     const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
+        //     const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+        //     //  const asmb = sAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+        //     var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
 
-            if (sSelectModelVersion.length > 0) {
-                baseFilter += ` and (${modVer})`;
-            }
-            if (sSelectUniqueId.length > 0) {
-                baseFilter += ` and (${unique})`;
-            }
-            if(sAsmb.length > 0 ){
-                baseFilter += ` and (${asmb})`;
-            }
+        //     if (sSelectModelVersion.length > 0) {
+        //         baseFilter += ` and (${modVer})`;
+        //     }
+        //     if (sSelectUniqueId.length > 0) {
+        //         baseFilter += ` and (${unique})`;
+        //     }
+        //     // if(sAsmb.length > 0 ){
+        //     //     baseFilter += ` and (${asmb})`;
+        //     // }
                 
 
 
-            let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID))`;
-              const asmbData = await that.readModel("getAsmbReqAnalysis", {
-                $apply: sApply,
-                $top:100000,
-            });
-            that.asmbFData = asmbData
-            if(that.asmbFData.lenght == 0 ){
-                that.showErrorMessage("No Data Found on Selected Filters");
-                that.showBusyIndicator(false);
-                return;
-            }
-        }
+        //     let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID))`;
+        //       const asmbData = await that.readModel("getAsmbReqAnalysis", {
+        //         $apply: sApply,
+        //         $top:100000,
+        //     });
+        //     // that.asmbFData = asmbData
+        //     // if(that.asmbFData.lenght == 0 ){
+        //     //     that.showErrorMessage("No Data Found on Selected Filters");
+        //     //     that.showBusyIndicator(false);
+        //     //     return;
+        //     // }
+        // }
 
             // 🔹 STEP 1: Refresh Unique IDs for selected product before fetching charts
             oModel.read("/getCirGen", {
@@ -901,11 +1194,11 @@ sap.ui.define([
 
                         var aKeys = [];
 
-                        if (sAsmb.length > 0 && that.asmbFData.length > 0) {
-                            that.asmbFData.forEach(y => {
-                                aKeys.push(y.UNIQUE_ID);
-                            })
-                        } else {
+                        // if (sAsmb.length > 0 && that.asmbFData.length > 0) {
+                        //     that.asmbFData.forEach(y => {
+                        //         aKeys.push(y.UNIQUE_ID);
+                        //     })
+                        // } else {
                             var selUID = that.byId("idUniqueID").getSelectedKeys()
 
                             if (selUID.length == 0 || oView.byId("idUniqueID").getSelectAllCheckbox().getSelected() === true) {
@@ -916,7 +1209,7 @@ sap.ui.define([
                             else {
                                 aKeys = selUID;
                             }
-                        }
+                        // }
                         
 
                         // selUID.forEach(x=>{
@@ -1615,7 +1908,7 @@ sap.ui.define([
                     that._selectAllCharacteristics();
 
                     console.log("CHAR_DESC loaded:", aFormatted.length);
-                    // this.showBusyIndicator(false);
+                    this.showBusyIndicator(false);
 
                 }.bind(this),
                 error: function (oError) {
@@ -1787,10 +2080,20 @@ sap.ui.define([
                 var selectedItems = oList.getSelectedItems().filter(si=> si.getTitle() !== "Select All");
                 that.CHARS = oEvent.getParameters().listItem.getTitle()
                 var cvList = that.byId("idCharValNum").getSelectedItems();
+
+                if(cvList.length === 0){
+                    that.prev = [];
+                }
                         
                         if (oSelectAllItem.getSelected() == false && selectedItems.length > 0 && cvList.length>0 && that.CHARS !== "Select All" ) {
-                            var aSelectedItems1 = cvList.filter(function (item) {
-                                return item.getTitle() !== "Select All";
+                                 var aSelectedItems1 =[]; 
+                            cvList.forEach(function (item,i) {
+                                if( item.getTitle() === "Select All"){
+                                    aSelectedItems1.push(cvList[i]);
+                                }
+                                else{
+                                    aSelectedItems1.push(cvList[i]);
+                                }
                             });
 
                            const result = aSelectedItems1.map(function (cv) {
@@ -1824,10 +2127,10 @@ sap.ui.define([
                             oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
                         }
 
-                        if (oCharChart) {
-                            oCharChart.unbindElement();
-                            oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
-                        }
+                        // if (oCharChart) {
+                        //     oCharChart.unbindElement();
+                        //     oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
+                        // }
                         // this._clearUniqueIDSelection();
                         that.showBusyIndicator(false);
                     }
@@ -1852,10 +2155,10 @@ sap.ui.define([
                         oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
                     }
 
-                    if (oCharChart) {
-                        oCharChart.unbindElement();
-                        oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
-                    }
+                    // if (oCharChart) {
+                    //     oCharChart.unbindElement();
+                    //     oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
+                    // }
                     // this._clearUniqueIDSelection();
                 }
             } finally {
@@ -2926,7 +3229,13 @@ sap.ui.define([
                         if (oSelectAllItem) oSelectAllItem.setSelected(true);
                     }
                     else{
-                        if (oSelectAllItem) oSelectAllItem.setSelected(false);
+                        const exists = that.prev.some(obj => obj.CHAR === "Select All");
+                        if(exists){
+                            if (oSelectAllItem) oSelectAllItem.setSelected(true);
+                        }else{
+                            if (oSelectAllItem) oSelectAllItem.setSelected(false);
+                        }
+                        
                     }
                    
 
@@ -2960,7 +3269,7 @@ sap.ui.define([
                                     //         oCharValList.setSelectedItem(cv,false);
                                     //     }
                                     // })
-                                } else if (cv.getTitle() == "Select All") {
+                               } else if (cv.getTitle() == "Select All" && cv.getSelected()=== false) {
                                     oCharValList.setSelectedItem(cv, false);
                                 } else {
                                     oCharValList.setSelectedItem(cv, true);
@@ -3922,15 +4231,15 @@ sap.ui.define([
             var oEndDate = this.byId("DRS1").getSecondDateValue();
             var uniqueID = this.byId("idUniqueID");
             var uniqueIdF = uniqueID.getSelectedItems().length > 0 ? uniqueID.getSelectedItems().map(y => { return y.getText() }) : uniqueID.getItems().map(x => { return x.getText() })
-              var oAsmb = this.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            //   var oAsmb = this.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             // var charvallist = this.byId("idCharValNum")
-            var fData = this.chartfinData;
-            if (fData) {
-                if (fData.length > 0) {
-                    const uniqueIDs1 = [...new Set(fData.map(item => item.UNIQUE_ID))];
-                    var uniqueIdF = uniqueIDs1
-                }
-            }
+            // var fData = this.chartfinData;
+            // if (fData) {
+            //     if (fData.length > 0) {
+            //         const uniqueIDs1 = [...new Set(fData.map(item => item.UNIQUE_ID))];
+            //         var uniqueIdF = uniqueIDs1
+            //     }
+            // }
 
             // Get all Unique IDs from the dropdown (not just selected ones)
             var oUniqueIDModel = this.getView().getModel("dependentModel");
@@ -3968,10 +4277,10 @@ sap.ui.define([
 
             var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique})`;
             
-            if(oAsmb.length>0){
-            const asm = oAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
-             baseFilter += ` and (${asm})`;
-            }
+            // if(oAsmb.length>0){
+            // const asm = oAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+            //  baseFilter += ` and (${asm})`;
+            // }
             var that = this;
              let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`;
 
@@ -4161,20 +4470,128 @@ sap.ui.define([
                 }
             });
         },
+        loadForecastChartMRP: function (baseFilter) {
+            var oModel = this.getView().getModel();
+             let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`;
 
+            oModel.read("/getAsmbReqAnalysis", {
+                urlParameters: {
+                    $apply: sApply, //`filter(LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique}))/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`,
+                    // "$select": "WEEK_DATE,ASSEMBLY_DESC,CIR_QTY,COUNT",
+                    "$top": 100000
+                },
+                success: function (oData) {
+                    console.log("Raw forecast data loaded:", oData.results.length);
 
-        // Add this function to your controller
-        onClear: function () {
-            that.byId("idLocation").setSelectedKey("");
-            that.byId("idConfigProduct").setSelectedKey();
-            that.byId("idProduct").setSelectedKey();
-            that.byId("idUniqueID").setSelectedKeys([]);
-            that.byId("idModelVersion").setSelectedKeys([]);
-            const oToday = new Date();
-            const oDateL = new Date(oToday.getFullYear(), oToday.getMonth(), 1);
-            const oDateH = new Date(oDateL.getFullYear(), oDateL.getMonth() + 3, 0);
-            that.byId("DRS1").setDateValue(oDateL);
-            that.byId("DRS1").setSecondDateValue(oDateH);
+                    // Group by WEEK_DATE and ASSEMBLY_DESC to aggregate CIR_QTY and COUNT
+                    var groupedData = {};
+                    var Data = oData.results.length > 0 ? oData.results : that.data;
+                    // oData.results.forEach(function (item) {
+
+                    var groupedData = {};
+
+                    Data.forEach(function (item) {
+                        // Skip if no week date
+                        if (!item.WEEK_DATE) {
+                            return;
+                        }
+
+                        // Handle missing or null ASSEMBLY_DESCRIPTION
+                        var assemblyDesc = item.ASSEMBLY_DESCRIPTION || "Unknown";
+
+                        // Format week date properly
+                        var weekDate = item.WEEK_DATE;
+                        if (weekDate instanceof Date) {
+                            weekDate = weekDate.toISOString().split('T')[0];
+                        } else if (typeof weekDate === "string" && weekDate.includes("T")) {
+                            weekDate = weekDate.split("T")[0];
+                        }
+
+                        // Create a unique key
+                        var key = weekDate + "_" + assemblyDesc;
+
+                        // Initialize if not exists
+                        if (!groupedData[key]) {
+                            groupedData[key] = {
+                                WEEK_DATE: weekDate,
+                                ASSEMBLY_DESC: assemblyDesc,
+                                totalCirQty: 0,
+                                totalCount: 0
+                            };
+                        }
+
+                        // Aggregate CIR_QTY and COUNT
+                        groupedData[key].totalCirQty += Number(item.CIR_QTY) || 0;
+                        groupedData[key].totalCount += Number(item.COUNT) || 0;
+                    });
+
+                    // Convert grouped data into array for chart
+                    var aChartData = Object.values(groupedData).map(function (item) {
+                        var forecastQty = 0;
+                        if (item.totalCount > 0) {
+                            forecastQty = item.totalCirQty / item.totalCount;
+                        }
+
+                        return {
+                            WEEK_DATE: item.WEEK_DATE,
+                            ASSEMBLY_DESC: item.ASSEMBLY_DESC,
+                            FORECAST_QTY: forecastQty
+                        };
+                    });
+
+                    // Sort by week date
+                    aChartData.sort(function (a, b) {
+                        return new Date(a.WEEK_DATE) - new Date(b.WEEK_DATE);
+                    });
+
+                    console.log("Processed forecast chart data:", aChartData);
+
+                    // Bind to VizFrame
+                    var oChartModel = new sap.ui.model.json.JSONModel({
+                        ForecastChartData: aChartData
+                    });
+                    that.byId("idForecastChart").setModel(oChartModel);
+
+                    // Hide chart title
+                    var oVizFrame = that.getView().byId("idForecastChart");
+                    // oVizFrame.setVizProperties({
+                    //     title: { visible: false }
+                    // });
+                    oVizFrame.setVizProperties({
+                        title: { visible: false },
+                        plotArea: {
+                            dataLabel: {
+                                visible: true,        // ✅ shows numeric values on dots
+                                formatString: "##.##" // optional, control decimal format
+                            },
+                            marker: {
+                                visible: true          // ✅ shows circular dots for each point
+                            }
+                        },
+                        valueAxis: {
+                            title: { visible: true, text: "Forecast Quantity" }
+                        },
+                        categoryAxis: {
+                            title: { visible: true, text: "Week Date" }
+                        }, tooltip: {
+                            visible: true,
+                            formatString: "#,##0"
+                        }, interaction: {
+                            behaviorType: "automatic"
+                        },
+                        legend: {
+                            visible: true
+                        }
+                    });
+
+                    that.showBusyIndicator(false);
+                },
+                error: function (oError) {
+                    console.error("Error loading forecast chart data:", oError);
+                    that.showErrorMessage("Failed to load forecast chart data");
+                    that.showBusyIndicator(false);
+                }
+            });
         },
         loadActualChart: function () {
             var oModel = this.getView().getModel();
@@ -4185,16 +4602,16 @@ sap.ui.define([
             var oEndDate = this.byId("DRS1").getSecondDateValue();
             var uniqueID = this.byId("idUniqueID");
             var uniqueIdF = uniqueID.getSelectedItems().length > 0 ? uniqueID.getSelectedItems().map(y => { return y.getText() }) : uniqueID.getItems().map(x => { return x.getText() })
-            var oAsmb = this.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            // var oAsmb = this.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
 
 
-            var fData = this.chartfinData;
-            if (fData) {
-                if (fData.length > 0) {
-                    const uniqueIDs1 = [...new Set(fData.map(item => item.UNIQUE_ID))];
-                    var uniqueIdF = uniqueIDs1
-                }
-            }
+            // var fData = this.chartfinData;
+            // if (fData) {
+            //     if (fData.length > 0) {
+            //         const uniqueIDs1 = [...new Set(fData.map(item => item.UNIQUE_ID))];
+            //         var uniqueIdF = uniqueIDs1
+            //     }
+            // }
             // Get all Unique IDs from the dropdown (not just selected ones)
             var oUniqueIDModel = this.getView().getModel("dependentModel");
             var aAllUniqueIDs = oUniqueIDModel ? (oUniqueIDModel.getProperty("/UniqueIDs") || []) : [];
@@ -4229,10 +4646,10 @@ sap.ui.define([
 
              var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique})`;
             
-            if(oAsmb.length>0){
-            const asm = oAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
-             baseFilter += ` and (${asm})`;
-            }
+            // if(oAsmb.length>0){
+            // const asm = oAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+            //  baseFilter += ` and (${asm})`;
+            // }
             var that = this;
              let sApply = `filter(${baseFilter})/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`;
 
@@ -4417,15 +4834,126 @@ sap.ui.define([
                 }
             });
         },
+        loadActualChartMRP: function (baseFilter) {
+            var oModel = this.getView().getModel();
+             let sApply = `filter(${baseFilter})/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`;
 
+            // Read data from getAsmbReqAnalysis
+            oModel.read("/getAsmbReqAnalysis", {
+                // filters: aFilters,
+                urlParameters: {
+                    $apply: sApply,
+                    "$top": 100000
+                },
+                success: function (oData) {
+                    console.log("Raw actual data loaded:", oData.results.length);
+                    var groupedData = {};
+                    var Data = oData.results.length > 0 ? oData.results : that.data;
 
+                    var groupedData = {};
 
+                    Data.forEach(function (item) {
+                        if (!item.WEEK_DATE) {
+                            return;
+                        }
+                        var assemblyDesc = item.ASSEMBLY_DESCRIPTION || "Unknown";
+                        var weekDate = item.WEEK_DATE;
+                        if (weekDate instanceof Date) {
+                            weekDate = weekDate.toISOString().split("T")[0];
+                        } else if (typeof weekDate === "string" && weekDate.includes("T")) {
+                            weekDate = weekDate.split("T")[0];
+                        }
+                        var key = weekDate + "_" + assemblyDesc;
 
+                        if (!groupedData[key]) {
+                            groupedData[key] = {
+                                WEEK_DATE: weekDate,
+                                ASSEMBLY_DESC: assemblyDesc,
+                                totalActualQty: 0,
+                                totalCount: 0
+                            };
+                        }
+                        groupedData[key].totalActualQty += Number(item.ACTUAL_QTY) || 0;
+                        groupedData[key].totalCount += Number(item.COUNT) || 0;
+                    });
 
+                    var aChartData = Object.values(groupedData).map(function (item) {
+                        var actualQty = 0;
+                        if (item.totalCount > 0) {
+                            actualQty = item.totalActualQty / item.totalCount;
+                        }
 
+                        return {
+                            WEEK_DATE: item.WEEK_DATE,
+                            ASSEMBLY_DESC: item.ASSEMBLY_DESC,
+                            FORECAST_QTY: actualQty
+                        };
+                    });
 
+                    // Sort data by date
+                    aChartData.sort(function (a, b) {
+                        return new Date(a.WEEK_DATE) - new Date(b.WEEK_DATE);
+                    });
 
+                    console.log("Processed actual chart data:", aChartData);
 
+                    // Bind to VizFrame
+                    var oChartModel = new sap.ui.model.json.JSONModel({
+                        ActualChartData: aChartData
+                    });
+                    that.byId("idActualChart").setModel(oChartModel);
+
+                    var oVizFrame = that.getView().byId("idActualChart");
+                    oVizFrame.setVizProperties({
+                        title: { visible: false },
+                        plotArea: {
+                            dataLabel: {
+                                visible: true,        // ✅ shows numeric values on dots
+                                formatString: "##.##" // optional, control decimal format
+                            },
+                            marker: {
+                                visible: true          // ✅ shows circular dots for each point
+                            }
+                        },
+                        valueAxis: {
+                            title: { visible: true, text: "Forecast Quantity" }
+                        },
+                        categoryAxis: {
+                            title: { visible: true, text: "Week Date" }
+                        },
+                        legend: {
+                            visible: true
+                        }
+                    });
+
+                    that.showBusyIndicator(false);
+                },
+                error: function (oError) {
+                    console.error("Error loading actual chart data:", oError);
+                    that.showErrorMessage("Failed to load actual chart data");
+                    that.showBusyIndicator(false);
+                }
+            });
+        },
+
+         onClear: function () {
+            that.byId("idLocation").setSelectedKey("");
+            that.byId("idConfigProduct").setSelectedKey();
+            that.byId("idProduct").setSelectedKey();
+            that.byId("idUniqueID").setSelectedKeys([]);
+            that.byId("idModelVersion").setSelectedKeys([]);
+            const oToday = new Date();
+            const oDateL = new Date(oToday.getFullYear(), oToday.getMonth(), 1);
+            const oDateH = new Date(oDateL.getFullYear(), oDateL.getMonth() + 3, 0);
+            that.byId("DRS1").setDateValue(oDateL);
+            that.byId("DRS1").setSecondDateValue(oDateH);
+            that.clearAllCharts();
+            that.prev = []; 
+            that.byId("idMRPG").setSelectedKeys([]);
+            that.byId("idMRPT").setSelectedKeys([]);
+            that.byId("idAssembly").setSelectedKeys([]);
+
+        },
 
         processChartData: function (data) {
             console.log("=== processChartData started with", data.length, "records ===");
@@ -4483,10 +5011,6 @@ sap.ui.define([
             });
             console.log("=== processFilteredData finished ===");
         },
-
-
-
-
 
         clearAllDependentDropdowns: function () {
             console.log("=== clearAllDependentDropdowns ===");
@@ -5006,6 +5530,7 @@ sap.ui.define([
                                 },
                                 success: function (oData) {
                                     var finData = JSON.parse(oData.getPlannedOrderData);
+                                    that.applyFilterData = finData;
                                     if (finData.length === 0) {
                                         that.showErrorMessage("No Data Found");
                                         that.showBusyIndicator(false);
@@ -5361,6 +5886,9 @@ sap.ui.define([
                     //    }
                 }
             }
+            that.byId("idMRPG").setSelectedKeys([]);
+            that.byId("idMRPT").setSelectedKeys([]);
+            that.byId("idAssembly").setSelectedKeys([]);
         }
     });
 });
@@ -5368,4 +5896,4 @@ sap.ui.define([
 
 /////////redeploy 29-10-2025////
 ///////// Assembly Fields 30-10-2025 view//////////////
-
+////////////MRP Filters/////////////
