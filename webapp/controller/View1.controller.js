@@ -61,7 +61,11 @@ sap.ui.define([
                 error: function (error) {
                     console.log(error);
                 }
+
             });
+            that.attachDynamicLoader("idMRPG", "onOpenMRPG", "MRPG");
+            that.attachDynamicLoader("idMRPT", "onOpenMRPT", "MRPT");
+            that.attachDynamicLoader("idAssembly", "onOpenAsmb", "ASSEMBLY");
 
 
             // } catch (error) {
@@ -90,21 +94,29 @@ sap.ui.define([
             that.byId("DRS1").setDateValue(oDateL);
             that.byId("DRS1").setSecondDateValue(oDateH);
 
-             var oMultiComboBoxMRPG = that.byId("idMRPG");
-            oMultiComboBoxMRPG.onBeforeOpen = function () {
-                 sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxMRPG, arguments);
-                that.onOpenMRPG();
-            }.bind(that);
-             var oMultiComboBoxMRPT= that.byId("idMRPT");
-            oMultiComboBoxMRPT.onBeforeOpen = function () {
-                 sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxMRPT, arguments);
-                that.onOpenMRPT();
-            }.bind(that);
-            var oMultiComboBoxAsmb = that.byId("idAssembly");
-            oMultiComboBoxAsmb.onBeforeOpen = function () {
-                 sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxAsmb, arguments);
-                that.onOpenAsmb();
-            }.bind(that);
+            // var oMultiComboBoxMRPG = that.byId("idMRPG");
+            // oMultiComboBoxMRPG.onBeforeOpen = async function () {
+            //     sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxMRPG, arguments);
+            //     if (!oMultiComboBoxMRPG.getItems().length) {
+            //         await that.onOpenMRPG();
+            //     }
+            // }.bind(that);
+
+            // var oMultiComboBoxMRPT = that.byId("idMRPT");
+            // oMultiComboBoxMRPT.onBeforeOpen = async function () {
+            //     sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxMRPT, arguments);
+            //     if (!oMultiComboBoxMRPT.getItems().length) {
+            //         await that.onOpenMRPT();
+            //     }
+            // }.bind(that);
+
+            // var oMultiComboBoxAsmb = that.byId("idAssembly");
+            // oMultiComboBoxAsmb.onBeforeOpen = async function () {
+            //      sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oMultiComboBoxAsmb, arguments);
+            //     if (!oMultiComboBoxAsmb.getItems().length) {
+            // await that.onOpenAsmb();
+            //     }
+            // }.bind(that);
 
             //  if (that.prev.length > 0) {
             //                     var cvlists = that.byId("idCharValNum");
@@ -118,6 +130,46 @@ sap.ui.define([
             //                 }
         },
 
+        attachDynamicLoader: function (oComboBoxId, sHandlerName, sFilterKey) {
+            const oComboBox = that.byId(oComboBoxId);
+            if (!oComboBox) return;
+
+            oComboBox.onBeforeOpen = async function () {
+                sap.m.MultiComboBox.prototype.onBeforeOpen.apply(oComboBox, arguments);
+
+                // 🔹 Use MRPG, MRPT, and Assembly selections as filters
+                const sSelectMRPG = that.byId("idMRPG")?.getSelectedKeys().filter(k => k && k.trim() !== "") || [];
+                const sSelectMRPT = that.byId("idMRPT")?.getSelectedKeys().filter(k => k && k.trim() !== "") || [];
+                const sSelectAssembly = that.byId("idAssembly")?.getSelectedKeys().filter(k => k && k.trim() !== "") || [];
+
+                // Build snapshot of current selections
+                const currentFilter = {
+                    MRPG: sSelectMRPG.join(","),
+                    MRPT: sSelectMRPT.join(","),
+                    ASSEMBLY: sSelectAssembly.join(",")
+                };
+
+                // Exclude current ComboBox from filter comparison
+                const comparisonFilter = { ...currentFilter };
+                if (oComboBoxId === "idMRPG") delete comparisonFilter.MRPG;
+                if (oComboBoxId === "idMRPT") delete comparisonFilter.MRPT;
+                if (oComboBoxId === "idAssembly") delete comparisonFilter.ASSEMBLY;
+
+                const lastFilter = that._lastFilterSnapshot ? that._lastFilterSnapshot[sFilterKey] : null;
+                const isSame = JSON.stringify(lastFilter) === JSON.stringify(comparisonFilter);
+
+                if (!isSame) {
+                    oComboBox.removeAllItems();
+
+                    // 🔹 Call your load function dynamically
+                    await that[sHandlerName]();
+
+                    // Save snapshot (excluding current dropdown itself)
+                    that._lastFilterSnapshot = that._lastFilterSnapshot || {};
+                    that._lastFilterSnapshot[sFilterKey] = comparisonFilter;
+                }
+            }.bind(that);
+        },
         bindDataToView: function (locationData) {
             console.log("=== bindDataToView started ===");
 
@@ -184,7 +236,7 @@ sap.ui.define([
             that.byId("idProduct").setSelectedKey();
             that.byId("idUniqueID").setSelectedKeys([]);
             that.byId("idModelVersion").setSelectedKeys([]);
-            
+
             const oToday = new Date();
             const oDateL = new Date(oToday.getFullYear(), oToday.getMonth(), 1);
             const oDateH = new Date(oDateL.getFullYear(), oDateL.getMonth() + 3, 0);
@@ -391,15 +443,15 @@ sap.ui.define([
 
         },
 
-        onOpenMRPG: async function(oEvent){
-            
+        onOpenMRPG: async function (oEvent) {
+
             var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
-            var sSelectedProduct =that.byId("idProduct").getSelectedKey();
+            var sSelectedProduct = that.byId("idProduct").getSelectedKey();
             var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             var oStartDate = this.byId("DRS1").getDateValue();
             var oEndDate = this.byId("DRS1").getSecondDateValue();
-             var uniques = [];
+            var uniques = [];
             if (that.applyFilterData.length > 0) {
                 that.applyFilterData.forEach(x => {
                     uniques.push(x.UNIQUE_ID)
@@ -410,7 +462,7 @@ sap.ui.define([
                 var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             }
             // console.log("Selected Product:", sSelectedProduct);
-
+            that.showBusyIndicator(true);
             const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
             const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
             var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
@@ -421,65 +473,46 @@ sap.ui.define([
             if (sSelectUniqueId.length > 0) {
                 baseFilter += ` and (${unique})`;
             }
-                
-            //  that.oModel.callFunction("/getPlannedOrderData", {
-            //                     method: "GET",
-            //                     urlParameters: {
-            //                         CHAR_DATA: JSON.stringify(valData),
-            //                         LOCATION_ID: selectedLocation,
-            //                         PRODUCT_ID: sSelectedProduct,
-            //                         CONFIG_PROD: sSelectedConfigProduct,
-            //                         MODEL_VERSION: aModelVersions,
-            //                         START_DATE: oStartDate,
-            //                         END_DATE: oEndDate,
-            //                         UNIQUE_ID: JSON.stringify(reqUniqs)
-            //                     },
-            //                     success: function (oData) {
-            //                          },
-            //                             error: function (error) {
-            //                                  console.log(error);
-            //                         that.showBusyIndicator(false);
-            //                         that.showErrorMessage(error);
-
-            //                             }
-            //                         });
 
             let sApply = `filter(${baseFilter})/groupby((MRP_GROUP))`;
-              const mrpgData = await that.readModel("getAsmbReqAnalysis", {
+            const mrpgData = await that.readModel("getAsmbReqAnalysis", {
                 $apply: sApply,
-                $top:100000,
+                $top: 100000,
             });
-                 mrpgData.forEach(x=>{
-                    if(x.MRP_GROUP == null){
-                        x.MRP_GROUP = "null";
-                    }
+            mrpgData.forEach(x => {
+                if (x.MRP_GROUP == null) {
+                    x.MRP_GROUP = "null";
+                }
+            })
+            mrpgData.sort((a, b) => {
+                const valA = (a.MRP_GROUP || '').toString();
+                const valB = (b.MRP_GROUP || '').toString();
+                return valA.localeCompare(valB);
+            });
+            var oMultiComboBox = that.byId("idMRPG");
+            var mrpgModel = new JSONModel({ items: mrpgData });
+            // that.byId("idAssembly").setModel(asmbData);
+            oMultiComboBox.unbindItems();
+            oMultiComboBox.removeAllItems();
+
+            oMultiComboBox.setModel(mrpgModel, "mrpgModel");
+
+            // Make sure MultiComboBox is bound to correct path
+
+            oMultiComboBox.bindItems({
+                path: "mrpgModel>/items",  // Path must not be undefined
+                template: new sap.ui.core.Item({
+                    key: "{mrpgModel>MRP_GROUP}",
+                    text: "{mrpgModel>MRP_GROUP}"
                 })
-                mrpgData.sort((a, b) => {
-  const valA = (a.MRP_GROUP || '').toString();
-  const valB = (b.MRP_GROUP || '').toString();
-  return valA.localeCompare(valB);
-});
-                 var oMultiComboBox = that.byId("idMRPG");
-                var mrpgModel = new JSONModel({items:mrpgData});
-                    // that.byId("idAssembly").setModel(asmbData);
-                    
-                    oMultiComboBox.setModel(mrpgModel, "mrpgModel");
-
-                    // Make sure MultiComboBox is bound to correct path
-                   
-                    oMultiComboBox.bindItems({
-                        path: "mrpgModel>/items",  // Path must not be undefined
-                        template: new sap.ui.core.Item({
-                            key: "{mrpgModel>MRP_GROUP}",
-                            text: "{mrpgModel>MRP_GROUP}"
-                        })
-                    });
+            });
+            that.showBusyIndicator(false);
         },
-        onOpenMRPT:async function(oEvent){
+        onOpenMRPT: async function (oEvent) {
 
-                var selectedLocation = that.byId("idLocation").getSelectedKey();
+            var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
-            var sSelectedProduct =that.byId("idProduct").getSelectedKey();
+            var sSelectedProduct = that.byId("idProduct").getSelectedKey();
             var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             var oStartDate = this.byId("DRS1").getDateValue();
             var oEndDate = this.byId("DRS1").getSecondDateValue();
@@ -495,13 +528,13 @@ sap.ui.define([
             }
             var sSelectMRPG = that.byId("idMRPG").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             // console.log("Selected Product:", sSelectedProduct);
-
+            that.showBusyIndicator(true);
             const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
             const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
             const mrpg = sSelectMRPG.map(id => {
                 if (id === null || id === 'null') {
                     return `MRP_GROUP eq null`; // only null
-                }else {
+                } else {
                     return `MRP_GROUP eq '${id}'`; // normal value
                 }
             })
@@ -515,47 +548,50 @@ sap.ui.define([
             if (sSelectUniqueId.length > 0) {
                 baseFilter += ` and (${unique})`;
             }
-            if(sSelectMRPG.length>0){
-                 baseFilter += ` and (${mrpg})`;
+            if (sSelectMRPG.length > 0) {
+                baseFilter += ` and (${mrpg})`;
             }
 
             let sApply = `filter(${baseFilter})/groupby((MRP_TYPE))`;
-              const mrptData = await that.readModel("getAsmbReqAnalysis", {
+            const mrptData = await that.readModel("getAsmbReqAnalysis", {
                 $apply: sApply,
-                $top:100000,
+                $top: 100000,
             });
-                mrptData.forEach(x=>{
-                    if(x.MRP_TYPE == null){
-                        x.MRP_TYPE = "null";
-                    }
-                })
-                mrptData.sort((a, b) => {
-  const valA = (a.MRP_TYPE || '').toString();
-  const valB = (b.MRP_TYPE || '').toString();
-  return valA.localeCompare(valB);
-});
-                 var oMultiComboBox = that.byId("idMRPT");
-                var mrptModel = new JSONModel({items:mrptData});
-                    // that.byId("idAssembly").setModel(asmbData);
-                    
-                    oMultiComboBox.setModel(mrptModel, "mrptModel");
+            mrptData.forEach(x => {
+                if (x.MRP_TYPE == null) {
+                    x.MRP_TYPE = "null";
+                }
+            })
+            mrptData.sort((a, b) => {
+                const valA = (a.MRP_TYPE || '').toString();
+                const valB = (b.MRP_TYPE || '').toString();
+                return valA.localeCompare(valB);
+            });
+            var oMultiComboBox = that.byId("idMRPT");
+            var mrptModel = new JSONModel({ items: mrptData });
+            // that.byId("idAssembly").setModel(asmbData);
+            oMultiComboBox.unbindItems();
+            oMultiComboBox.removeAllItems();
 
-                    // Make sure MultiComboBox is bound to correct path
-                   
-                    oMultiComboBox.bindItems({
-                        path: "mrptModel>/items",  // Path must not be undefined
-                        template: new sap.ui.core.Item({
-                            key: "{mrptModel>MRP_TYPE}",
-                            text: "{mrptModel>MRP_TYPE}"
-                        })
-                    });
+            oMultiComboBox.setModel(mrptModel, "mrptModel");
+
+            // Make sure MultiComboBox is bound to correct path
+
+            oMultiComboBox.bindItems({
+                path: "mrptModel>/items",  // Path must not be undefined
+                template: new sap.ui.core.Item({
+                    key: "{mrptModel>MRP_TYPE}",
+                    text: "{mrptModel>MRP_TYPE}"
+                })
+            });
+            that.showBusyIndicator(false);
 
         },
-        onOpenAsmb: async function(oEvent){
+        onOpenAsmb: async function (oEvent) {
 
-                var selectedLocation = that.byId("idLocation").getSelectedKey();
+            var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
-            var sSelectedProduct =that.byId("idProduct").getSelectedKey();
+            var sSelectedProduct = that.byId("idProduct").getSelectedKey();
             var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             var oStartDate = this.byId("DRS1").getDateValue();
             var oEndDate = this.byId("DRS1").getSecondDateValue();
@@ -572,7 +608,7 @@ sap.ui.define([
             var sSelectMRPG = that.byId("idMRPG").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             var sSelectMRPT = that.byId("idMRPT").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             // console.log("Selected Product:", sSelectedProduct);
-
+            that.showBusyIndicator(true);
             const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
             const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
             const mrpg = sSelectMRPG.map(id => {
@@ -605,52 +641,55 @@ sap.ui.define([
             if (sSelectUniqueId.length > 0) {
                 baseFilter += ` and (${unique})`;
             }
-               if(sSelectMRPG.length>0){
-                 baseFilter += ` and (${mrpg})`;
+            if (sSelectMRPG.length > 0) {
+                baseFilter += ` and (${mrpg})`;
             }
-               if(sSelectMRPG.length>0){
-                 baseFilter += ` and (${mrpt})`;
+            if (sSelectMRPT.length > 0) {
+                baseFilter += ` and (${mrpt})`;
             }
-                
+
 
 
             let sApply = `filter(${baseFilter})/groupby((ASSEMBLY_DESCRIPTION))`;
-              const asmbData = await that.readModel("getAsmbReqAnalysis", {
+            const asmbData = await that.readModel("getAsmbReqAnalysis", {
                 $apply: sApply,
-                $top:100000,
+                $top: 100000,
             });
-                 var oMultiComboBox = that.byId("idAssembly");
-                 asmbData.sort((a, b) => {
-  const valA = (a.ASSEMBLY_DESCRIPTION || '').toString();
-  const valB = (b.ASSEMBLY_DESCRIPTION || '').toString();
-  return valA.localeCompare(valB);
-});
-                var asmbModel = new JSONModel({items:asmbData});
-                    // that.byId("idAssembly").setModel(asmbData);
-                    
-                    oMultiComboBox.setModel(asmbModel, "asmbModel");
+            var oMultiComboBox = that.byId("idAssembly");
+            asmbData.sort((a, b) => {
+                const valA = (a.ASSEMBLY_DESCRIPTION || '').toString();
+                const valB = (b.ASSEMBLY_DESCRIPTION || '').toString();
+                return valA.localeCompare(valB);
+            });
+            var asmbModel = new JSONModel({ items: asmbData });
+            // that.byId("idAssembly").setModel(asmbData);
+            oMultiComboBox.unbindItems();
+            oMultiComboBox.removeAllItems();
+            oMultiComboBox.setModel(asmbModel, "asmbModel");
 
-                    // Make sure MultiComboBox is bound to correct path
-                   
-                    oMultiComboBox.bindItems({
-                        path: "asmbModel>/items",  // Path must not be undefined
-                        template: new sap.ui.core.Item({
-                            key: "{asmbModel>ASSEMBLY_DESCRIPTION}",
-                            text: "{asmbModel>ASSEMBLY_DESCRIPTION}"
-                        })
-                    });
+            // Make sure MultiComboBox is bound to correct path
+
+
+            oMultiComboBox.bindItems({
+                path: "asmbModel>/items",  // Path must not be undefined
+                template: new sap.ui.core.Item({
+                    key: "{asmbModel>ASSEMBLY_DESCRIPTION}",
+                    text: "{asmbModel>ASSEMBLY_DESCRIPTION}"
+                })
+            });
+            that.showBusyIndicator(false);
         },
 
-        onMRPFilters:function(){
-              
+        onMRPFilters: function () {
+
             that.showBusyIndicator(true);
             var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
-            var sSelectedProduct =that.byId("idProduct").getSelectedKey();
+            var sSelectedProduct = that.byId("idProduct").getSelectedKey();
             var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             var oStartDate = this.byId("DRS1").getDateValue();
             var oEndDate = this.byId("DRS1").getSecondDateValue();
-             var uniques = [];
+            var uniques = [];
             if (that.applyFilterData.length > 0) {
                 that.applyFilterData.forEach(x => {
                     uniques.push(x.UNIQUE_ID)
@@ -662,12 +701,12 @@ sap.ui.define([
             }
             var sSelectMRPG = that.byId("idMRPG").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             var sSelectMRPT = that.byId("idMRPT").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
-              var sSelectAssembly = that.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var sSelectAssembly = that.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             // console.log("Selected Product:", sSelectedProduct);
 
             const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
             const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
-             const mrpg = sSelectMRPG.map(id => {
+            const mrpg = sSelectMRPG.map(id => {
                 if (id === null || id === 'null') {
                     return `MRP_GROUP eq null`; // only null
                 } else if (id === '') {
@@ -688,7 +727,7 @@ sap.ui.define([
                 }
             })
                 .join(' or ');
-            const asmb = sSelectAssembly.map(id =>`ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+            const asmb = sSelectAssembly.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
             var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
 
             if (sSelectModelVersion.length > 0) {
@@ -697,14 +736,14 @@ sap.ui.define([
             if (sSelectUniqueId.length > 0) {
                 baseFilter += ` and (${unique})`;
             }
-              if(sSelectMRPG.length>0){
-                 baseFilter += ` and (${mrpg})`;
+            if (sSelectMRPG.length > 0) {
+                baseFilter += ` and (${mrpg})`;
             }
-               if(sSelectMRPG.length>0){
-                 baseFilter += ` and (${mrpt})`;
+            if (sSelectMRPT.length > 0) {
+                baseFilter += ` and (${mrpt})`;
             }
-               if(sSelectAssembly.length>0){
-                 baseFilter += ` and (${asmb})`;
+            if (sSelectAssembly.length > 0) {
+                baseFilter += ` and (${asmb})`;
             }
             that.loadForecastChartMRP(baseFilter);
             that.loadActualChartMRP(baseFilter);
@@ -715,7 +754,7 @@ sap.ui.define([
             that.byId("idMRPT").setSelectedKeys([]);
             that.byId("idAssembly").setSelectedKeys([]);
 
-                var oForecastChart = this.byId("idForecastChart");
+            var oForecastChart = this.byId("idForecastChart");
             if (oForecastChart) {
                 oForecastChart.setModel(new sap.ui.model.json.JSONModel({ ForecastChartData: [] }));
             }
@@ -1092,7 +1131,7 @@ sap.ui.define([
         },
 
         onApplyFilters: async function (oEvent) {
-            if(this.byId("idLocation").getSelectedKey().length == 0 ){
+            if (this.byId("idLocation").getSelectedKey().length == 0) {
                 // that.showErrorMessage("Mandatory Fields not Selected");
                 that.showBusyIndicator(false);
                 return;
@@ -1125,38 +1164,38 @@ sap.ui.define([
             var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             // var sAsmb =  that.byId("idAssembly").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
             // console.log("Selected Product:", sSelectedProduct);
-        //     if(sAsmb.length>0){
-                
-            
-        //     const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
-        //     const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
-        //     //  const asmb = sAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
-        //     var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
-
-        //     if (sSelectModelVersion.length > 0) {
-        //         baseFilter += ` and (${modVer})`;
-        //     }
-        //     if (sSelectUniqueId.length > 0) {
-        //         baseFilter += ` and (${unique})`;
-        //     }
-        //     // if(sAsmb.length > 0 ){
-        //     //     baseFilter += ` and (${asmb})`;
-        //     // }
-                
+            //     if(sAsmb.length>0){
 
 
-        //     let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID))`;
-        //       const asmbData = await that.readModel("getAsmbReqAnalysis", {
-        //         $apply: sApply,
-        //         $top:100000,
-        //     });
-        //     // that.asmbFData = asmbData
-        //     // if(that.asmbFData.lenght == 0 ){
-        //     //     that.showErrorMessage("No Data Found on Selected Filters");
-        //     //     that.showBusyIndicator(false);
-        //     //     return;
-        //     // }
-        // }
+            //     const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
+            //     const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+            //     //  const asmb = sAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
+            //     var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
+
+            //     if (sSelectModelVersion.length > 0) {
+            //         baseFilter += ` and (${modVer})`;
+            //     }
+            //     if (sSelectUniqueId.length > 0) {
+            //         baseFilter += ` and (${unique})`;
+            //     }
+            //     // if(sAsmb.length > 0 ){
+            //     //     baseFilter += ` and (${asmb})`;
+            //     // }
+
+
+
+            //     let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID))`;
+            //       const asmbData = await that.readModel("getAsmbReqAnalysis", {
+            //         $apply: sApply,
+            //         $top:100000,
+            //     });
+            //     // that.asmbFData = asmbData
+            //     // if(that.asmbFData.lenght == 0 ){
+            //     //     that.showErrorMessage("No Data Found on Selected Filters");
+            //     //     that.showBusyIndicator(false);
+            //     //     return;
+            //     // }
+            // }
 
             // 🔹 STEP 1: Refresh Unique IDs for selected product before fetching charts
             oModel.read("/getCirGen", {
@@ -1199,18 +1238,18 @@ sap.ui.define([
                         //         aKeys.push(y.UNIQUE_ID);
                         //     })
                         // } else {
-                            var selUID = that.byId("idUniqueID").getSelectedKeys()
+                        var selUID = that.byId("idUniqueID").getSelectedKeys()
 
-                            if (selUID.length == 0 || oView.byId("idUniqueID").getSelectAllCheckbox().getSelected() === true) {
-                                oView.byId("idUniqueID").getItems().forEach(y => {
-                                    aKeys.push(y.getText())
-                                })
-                            }
-                            else {
-                                aKeys = selUID;
-                            }
+                        if (selUID.length == 0 || oView.byId("idUniqueID").getSelectAllCheckbox().getSelected() === true) {
+                            oView.byId("idUniqueID").getItems().forEach(y => {
+                                aKeys.push(y.getText())
+                            })
+                        }
+                        else {
+                            aKeys = selUID;
+                        }
                         // }
-                        
+
 
                         // selUID.forEach(x=>{
                         //     aUniqueIDs.push({UNIQUE_ID:x})
@@ -1303,7 +1342,7 @@ sap.ui.define([
                         aAllCharValues.add(item.CHAR_CHARVALUE);
 
                         var yearQuarter = item.YEAR_QUAETER;
-                        var category = item.CHAR_DESC + " " + item.CHAR_CHARVALUE;
+                        var category = item.CHAR_CHARVALUE;
                         var key = yearQuarter + "|" + category;
 
                         if (!groupedData[key]) {
@@ -1321,11 +1360,12 @@ sap.ui.define([
                         groupedData[key].Forecast += item.CIR_QTY || 0;
                     });
 
-                    // --- Prepare chart data with combined label ---
+                    // --- Prepare chart data ---
                     var chartData = Object.values(groupedData).map(function (d) {
                         var total = d.Sales + d.Unconsumed;
                         return {
-                            QuarterCharacteristic: d.YearQuarter + " | " + d.Category, // Combined label
+                            YearQuarter: d.YearQuarter,   // separate field for grouping
+                            Category: d.Category,         // separate field for subgroup
                             Sales: d.Sales > 0 ? d.Sales : null,
                             Unconsumed: d.Unconsumed,
                             Forecast: d.Forecast,
@@ -1335,13 +1375,19 @@ sap.ui.define([
 
                     console.log("Chart data prepared:", chartData);
 
+                    // Optional sorting by characteristic
+                    chartData.sort((a, b) => {
+                        return a.Category.trim().localeCompare(b.Category.trim());
+                    });
+
                     // --- Set up model and dataset ---
                     var oChartModel = new sap.ui.model.json.JSONModel({ CharData: chartData });
-                    var oVizFrame = this.byId("idCharChart");
+                    var oVizFrame = that.byId("idCharChart");
 
                     var oDataset = new sap.viz.ui5.data.FlattenedDataset({
                         dimensions: [
-                            { name: "Quarter / Characteristic", value: "{QuarterCharacteristic}" }
+                            { name: "Quarter", value: "{YearQuarter}" },       // ✅ separate dimension
+                            { name: "Characteristic", value: "{Category}" }    // ✅ separate dimension
                         ],
                         measures: [
                             { name: "Unconsumed", value: "{Unconsumed}" },
@@ -1359,7 +1405,7 @@ sap.ui.define([
                     oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
                         uid: "categoryAxis",
                         type: "Dimension",
-                        values: ["Quarter / Characteristic"]
+                        values: ["Quarter", "Characteristic"] // 👈 Important for grouping
                     }));
 
                     oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
@@ -1381,7 +1427,11 @@ sap.ui.define([
                         plotArea: {
                             primaryScale: { fixedRange: false, minValue: 0 },
                             secondaryScale: { fixedRange: false, minValue: 0 },
-                            dataLabel: { visible: true, showTotal: true, formatString: "#,##0" },
+                            dataLabel: {
+                                visible: true,
+                                showTotal: true,
+                                formatString: "#,##0"
+                            },
                             dataPointStyle: {
                                 rules: [
                                     {
@@ -1396,14 +1446,19 @@ sap.ui.define([
                                     },
                                     {
                                         dataContext: { Forecast: "*" },
-                                        properties: { color: "#2196F3", lineColor: "#2196F3", lineWidth: 3 },
+                                        properties: {
+                                            color: "#2196F3",
+                                            lineColor: "#2196F3",
+                                            lineWidth: 3
+                                        },
                                         displayName: "Forecast"
                                     }
                                 ]
                             },
                             dataShape: {
                                 primaryAxis: ["bar", "bar"],
-                                secondaryAxis: ["line"]
+                                secondaryAxis: ["line"],
+                                isStacked: true
                             },
                             marker: { visible: true, size: 8 }
                         },
@@ -1976,92 +2031,92 @@ sap.ui.define([
                 }
             }
         },
-    //     onCharacteristicChange: function (oEvent) {
+        //     onCharacteristicChange: function (oEvent) {
 
-    //         var charValCont = that.byId("idCharValNum")
-    //         var charValContItem = charValCont.getSelectedItems();
+        //         var charValCont = that.byId("idCharValNum")
+        //         var charValContItem = charValCont.getSelectedItems();
 
-    //         if(charValContItem.length>0){
-    //             var aSelectedItems = charValContItem.filter(function (item) {
-    //                 return item.getTitle() !== "Select All";
-    //             });
+        //         if(charValContItem.length>0){
+        //             var aSelectedItems = charValContItem.filter(function (item) {
+        //                 return item.getTitle() !== "Select All";
+        //             });
 
-    //             that.prev = aSelectedItems.map(function (cv) {
-    //                 var str = cv.getTitle();
-    //                 const [CHAR, ...rest] = str.split(/-(.+)/);
-    //                 const VAL = rest.length ? rest[0].trim() : "";
-    //                 return {
-    //                     CHAR: CHAR.trim(),
-    //                     VAL: VAL,
-    //                     CHAR_VAL: str.trim()
-    //                 };
-    //             });
-                
-    //         }
-    //         else{
-    //  try {
-    //             var oList = that.byId("idCharacteristics")// oEvent.getSource();
-    //             var aSelectedItems = oList.getSelectedItems();
-    //             var oSelectAllItem = oList.getItems().find(i => i.getTitle() === "Select All");
-    //             var aAllItemsExceptSelectAll = oList.getItems().filter(i => i.getTitle() !== "Select All");
-    //             var CHARS = oEvent.getSource().getSelectedItem().getTitle()
-    //             if (oEvent.getParameter("listItem") === oSelectAllItem) {
-    //                 if (oSelectAllItem.getSelected()) {
-    //                     that.SelectedAll = true;
-    //                     aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, true));
-    //                     var aAllCharKeys = aAllItemsExceptSelectAll.map(item => item.getTitle());
-    //                     this._loadCharacteristicValues(aAllCharKeys);
-    //                     // this._loadAllUniqueIDsForAllCharacteristics(aAllCharKeys);
-    //                     // this._loadValuesAndUniqueIDs(aAllCharKeys);
-    //                 } else {
-    //                     aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, false));
-    //                     var oCharValNum = this.byId("idCharValNum");
-    //                     var oCharChart = this.byId("idCharChart");
+        //             that.prev = aSelectedItems.map(function (cv) {
+        //                 var str = cv.getTitle();
+        //                 const [CHAR, ...rest] = str.split(/-(.+)/);
+        //                 const VAL = rest.length ? rest[0].trim() : "";
+        //                 return {
+        //                     CHAR: CHAR.trim(),
+        //                     VAL: VAL,
+        //                     CHAR_VAL: str.trim()
+        //                 };
+        //             });
 
-    //                     if (oCharValNum) {
-    //                         oCharValNum.unbindItems();
-    //                         oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
-    //                     }
+        //         }
+        //         else{
+        //  try {
+        //             var oList = that.byId("idCharacteristics")// oEvent.getSource();
+        //             var aSelectedItems = oList.getSelectedItems();
+        //             var oSelectAllItem = oList.getItems().find(i => i.getTitle() === "Select All");
+        //             var aAllItemsExceptSelectAll = oList.getItems().filter(i => i.getTitle() !== "Select All");
+        //             var CHARS = oEvent.getSource().getSelectedItem().getTitle()
+        //             if (oEvent.getParameter("listItem") === oSelectAllItem) {
+        //                 if (oSelectAllItem.getSelected()) {
+        //                     that.SelectedAll = true;
+        //                     aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, true));
+        //                     var aAllCharKeys = aAllItemsExceptSelectAll.map(item => item.getTitle());
+        //                     this._loadCharacteristicValues(aAllCharKeys);
+        //                     // this._loadAllUniqueIDsForAllCharacteristics(aAllCharKeys);
+        //                     // this._loadValuesAndUniqueIDs(aAllCharKeys);
+        //                 } else {
+        //                     aAllItemsExceptSelectAll.forEach(item => oList.setSelectedItem(item, false));
+        //                     var oCharValNum = this.byId("idCharValNum");
+        //                     var oCharChart = this.byId("idCharChart");
 
-    //                     if (oCharChart) {
-    //                         oCharChart.unbindElement();
-    //                         oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
-    //                     }
-    //                     // this._clearUniqueIDSelection();
-    //                 }
-    //                 return;
-    //             }
+        //                     if (oCharValNum) {
+        //                         oCharValNum.unbindItems();
+        //                         oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
+        //                     }
 
-    //             var aSelectedKeys = aSelectedItems.map(i => i.getTitle()).filter(t => t !== "Select All");
+        //                     if (oCharChart) {
+        //                         oCharChart.unbindElement();
+        //                         oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
+        //                     }
+        //                     // this._clearUniqueIDSelection();
+        //                 }
+        //                 return;
+        //             }
 
-    //             if (oSelectAllItem && oSelectAllItem.getSelected() && aSelectedKeys.length < aAllItemsExceptSelectAll.length) {
-    //                 oSelectAllItem.setSelected(false);
-    //             }
+        //             var aSelectedKeys = aSelectedItems.map(i => i.getTitle()).filter(t => t !== "Select All");
 
-    //             if (aSelectedKeys.length > 0) {
-    //                 this._loadCharacteristicValues(aSelectedKeys);
-    //                 // this._loadValuesAndUniqueIDs(aSelectedKeys);
-    //             } else {
-    //                 var oCharValNum = this.byId("idCharValNum");
-    //                 var oCharChart = this.byId("idCharChart");
+        //             if (oSelectAllItem && oSelectAllItem.getSelected() && aSelectedKeys.length < aAllItemsExceptSelectAll.length) {
+        //                 oSelectAllItem.setSelected(false);
+        //             }
 
-    //                 if (oCharValNum) {
-    //                     oCharValNum.unbindItems();
-    //                     oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
-    //                 }
+        //             if (aSelectedKeys.length > 0) {
+        //                 this._loadCharacteristicValues(aSelectedKeys);
+        //                 // this._loadValuesAndUniqueIDs(aSelectedKeys);
+        //             } else {
+        //                 var oCharValNum = this.byId("idCharValNum");
+        //                 var oCharChart = this.byId("idCharChart");
 
-    //                 if (oCharChart) {
-    //                     oCharChart.unbindElement();
-    //                     oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
-    //                 }
-    //                 // this._clearUniqueIDSelection();
-    //             }
-    //         } finally {
-    //             this._bCharSelectionInProgress = false;   
-    //         }
+        //                 if (oCharValNum) {
+        //                     oCharValNum.unbindItems();
+        //                     oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
+        //                 }
 
-    //         }
-    //      } ,
+        //                 if (oCharChart) {
+        //                     oCharChart.unbindElement();
+        //                     oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
+        //                 }
+        //                 // this._clearUniqueIDSelection();
+        //             }
+        //         } finally {
+        //             this._bCharSelectionInProgress = false;   
+        //         }
+
+        //         }
+        //      } ,
         // Replace your existing onCharacteristicChange function with this:
 
         onCharacteristicChange: function (oEvent) {
@@ -2072,42 +2127,42 @@ sap.ui.define([
             try {
                 // that.showBusyIndicator(true);
 
-                
+
                 var oList = that.byId("idCharacteristics")// oEvent.getSource();
                 var aSelectedItems = oList.getSelectedItems();
                 var oSelectAllItem = oList.getItems().find(i => i.getTitle() === "Select All");
                 var aAllItemsExceptSelectAll = oList.getItems().filter(i => i.getTitle() !== "Select All");
-                var selectedItems = oList.getSelectedItems().filter(si=> si.getTitle() !== "Select All");
+                var selectedItems = oList.getSelectedItems().filter(si => si.getTitle() !== "Select All");
                 that.CHARS = oEvent.getParameters().listItem.getTitle()
                 var cvList = that.byId("idCharValNum").getSelectedItems();
 
-                if(cvList.length === 0){
+                if (cvList.length === 0) {
                     that.prev = [];
                 }
-                        
-                        if (oSelectAllItem.getSelected() == false && selectedItems.length > 0 && cvList.length>0 && that.CHARS !== "Select All" ) {
-                                 var aSelectedItems1 =[]; 
-                            cvList.forEach(function (item,i) {
-                                if( item.getTitle() === "Select All"){
-                                    aSelectedItems1.push(cvList[i]);
-                                }
-                                else{
-                                    aSelectedItems1.push(cvList[i]);
-                                }
-                            });
 
-                           const result = aSelectedItems1.map(function (cv) {
-                                var str = cv.getTitle();
-                                const [CHAR, ...rest] = str.split(/-(.+)/);
-                                const VAL = rest.length ? rest[0].trim() : "";
-                                return {
-                                    CHAR: CHAR.trim(),
-                                    VAL: VAL,
-                                    CHAR_VAL: str.trim()
-                                };
-                            });
-                            that.prev = result;
+                if (oSelectAllItem.getSelected() == false && selectedItems.length > 0 && cvList.length > 0 && that.CHARS !== "Select All") {
+                    var aSelectedItems1 = [];
+                    cvList.forEach(function (item, i) {
+                        if (item.getTitle() === "Select All") {
+                            aSelectedItems1.push(cvList[i]);
                         }
+                        else {
+                            aSelectedItems1.push(cvList[i]);
+                        }
+                    });
+
+                    const result = aSelectedItems1.map(function (cv) {
+                        var str = cv.getTitle();
+                        const [CHAR, ...rest] = str.split(/-(.+)/);
+                        const VAL = rest.length ? rest[0].trim() : "";
+                        return {
+                            CHAR: CHAR.trim(),
+                            VAL: VAL,
+                            CHAR_VAL: str.trim()
+                        };
+                    });
+                    that.prev = result;
+                }
                 if (oEvent.getParameter("listItem") === oSelectAllItem) {
                     if (oSelectAllItem.getSelected()) {
                         that.SelectedAll = true;
@@ -2243,12 +2298,12 @@ sap.ui.define([
                 var sTitle = oItem.getTitle();
 
                 // Skip "Select All"
-                if (sTitle === "Select All" && thar.prev.length>0) {
+                if (sTitle === "Select All" && thar.prev.length > 0) {
                     charLis.setSelectedItem(oItem, true);
                     return;
 
                 }
-                else if(sTitle === "Select All" ){
+                else if (sTitle === "Select All") {
                     return;
                 }
 
@@ -2258,7 +2313,7 @@ sap.ui.define([
                 });
 
                 if (bWasSelected) {
-                    
+
                     charLis.setSelectedItem(oItem, true);
                 }
             });
@@ -3119,8 +3174,8 @@ sap.ui.define([
             //     console.log("⚠️  _loadCharacteristicValues already in progress, skipping");
             //     return;
             // }
-            
-              var sLocationId = this.byId("idLocation").getSelectedKey();
+
+            var sLocationId = this.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = this.byId("idConfigProduct").getSelectedKey();
             var aSelectedConfigProducts = sSelectedConfigProduct ? [sSelectedConfigProduct] : [];
             var sProducts = this.byId("idProduct").getSelectedKey();
@@ -3224,20 +3279,20 @@ sap.ui.define([
                         aAllValueItems.forEach(i => oCharValList.setSelectedItem(i, true));
                         if (oSelectAllItem) oSelectAllItem.setSelected(true);
                     }
-                    else if(that.prev.length == 0){
-                         aAllValueItems.forEach(i => oCharValList.setSelectedItem(i, true));
+                    else if (that.prev.length == 0) {
+                        aAllValueItems.forEach(i => oCharValList.setSelectedItem(i, true));
                         if (oSelectAllItem) oSelectAllItem.setSelected(true);
                     }
-                    else{
+                    else {
                         const exists = that.prev.some(obj => obj.CHAR === "Select All");
-                        if(exists){
+                        if (exists) {
                             if (oSelectAllItem) oSelectAllItem.setSelected(true);
-                        }else{
+                        } else {
                             if (oSelectAllItem) oSelectAllItem.setSelected(false);
                         }
-                        
+
                     }
-                   
+
 
                     // Release flags after a delay
                     setTimeout(() => {
@@ -3269,7 +3324,7 @@ sap.ui.define([
                                     //         oCharValList.setSelectedItem(cv,false);
                                     //     }
                                     // })
-                               } else if (cv.getTitle() == "Select All" && cv.getSelected()=== false) {
+                                } else if (cv.getTitle() == "Select All" && cv.getSelected() === false) {
                                     oCharValList.setSelectedItem(cv, false);
                                 } else {
                                     oCharValList.setSelectedItem(cv, true);
@@ -3279,7 +3334,7 @@ sap.ui.define([
 
                         }
                         that.showBusyIndicator(false);
-                         console.log("loadchar trigger timeout")
+                        console.log("loadchar trigger timeout")
                         // that._loadChartDataForCharValuesSelectedIDs(aSelectedChars, aAllValueTitles);
                     }, 300);
                     console.log("loadchar trigger")
@@ -3727,7 +3782,7 @@ sap.ui.define([
         //                                 //////////////////////////////////////
         //                                 var groupedData = {};
         //                                 var aAllCharValues = new Set();
-                                        
+
         //                                 finData.forEach(function (item) {
         //                                     if (!item.CHAR_DESC || !item.CHAR_CHARVALUE || !item.YEAR_QUAETER) return;
 
@@ -3891,7 +3946,7 @@ sap.ui.define([
         //                                 });
 
         //                                 // Only proceed if there are valid selections
-                                     
+
         //                                 // console.log(result);
 
 
@@ -4276,13 +4331,13 @@ sap.ui.define([
             const unique = uniqueIdF.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
 
             var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique})`;
-            
+
             // if(oAsmb.length>0){
             // const asm = oAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
             //  baseFilter += ` and (${asm})`;
             // }
             var that = this;
-             let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`;
+            let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`;
 
             oModel.read("/getAsmbReqAnalysis", {
                 urlParameters: {
@@ -4472,7 +4527,7 @@ sap.ui.define([
         },
         loadForecastChartMRP: function (baseFilter) {
             var oModel = this.getView().getModel();
-             let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`;
+            let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`;
 
             oModel.read("/getAsmbReqAnalysis", {
                 urlParameters: {
@@ -4644,14 +4699,14 @@ sap.ui.define([
             }
             const unique = uniqueIdF.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
 
-             var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique})`;
-            
+            var baseFilter = `LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique})`;
+
             // if(oAsmb.length>0){
             // const asm = oAsmb.map(id => `ASSEMBLY_DESCRIPTION eq '${id}'`).join(' or ');
             //  baseFilter += ` and (${asm})`;
             // }
             var that = this;
-             let sApply = `filter(${baseFilter})/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`;
+            let sApply = `filter(${baseFilter})/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`;
 
             var that = this;
 
@@ -4836,7 +4891,7 @@ sap.ui.define([
         },
         loadActualChartMRP: function (baseFilter) {
             var oModel = this.getView().getModel();
-             let sApply = `filter(${baseFilter})/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`;
+            let sApply = `filter(${baseFilter})/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`;
 
             // Read data from getAsmbReqAnalysis
             oModel.read("/getAsmbReqAnalysis", {
@@ -4936,7 +4991,7 @@ sap.ui.define([
             });
         },
 
-         onClear: function () {
+        onClear: function () {
             that.byId("idLocation").setSelectedKey("");
             that.byId("idConfigProduct").setSelectedKey();
             that.byId("idProduct").setSelectedKey();
@@ -4948,7 +5003,7 @@ sap.ui.define([
             that.byId("DRS1").setDateValue(oDateL);
             that.byId("DRS1").setSecondDateValue(oDateH);
             that.clearAllCharts();
-            that.prev = []; 
+            that.prev = [];
             that.byId("idMRPG").setSelectedKeys([]);
             that.byId("idMRPT").setSelectedKeys([]);
             that.byId("idAssembly").setSelectedKeys([]);
@@ -5098,7 +5153,10 @@ sap.ui.define([
             return fetchData();
         },
         onAppFilter: function (oEvent) {
-
+            if (this.byId("idLocation").getSelectedKey().length == 0) {
+                that.showBusyIndicator(false);
+                return;
+            }
             var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
             var sSelectedProduct = that.byId("idProduct").getSelectedKey();
@@ -5121,10 +5179,10 @@ sap.ui.define([
 
             const charcharvalFilter = charcharvalTitle.map(id => `CHAR_CHARVALUE eq '${id}'`).join(' or ');
             // if (selAllChk[0].getTitle() === "Select All" && selAllChk[0].getSelected() === true) {
-                
+
 
             // } else {
-               
+
             // }
 
             that.showBusyIndicator(true);
@@ -5145,7 +5203,7 @@ sap.ui.define([
 
                             that.chartfinData = oData.results;
                             const unique = reqUniqs.map(id => `UNIQUE_ID eq ${id}`).join(' or ');
-                              that.oModel.read("/getCirGen", {
+                            that.oModel.read("/getCirGen", {
                                 urlParameters: {
                                     $apply: `filter(LOCATION_ID eq '${selectedLocation}'  and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate} and WEEK_DATE le ${oEndDate}) and (${unique}))`,
                                     "$top": 100000,
@@ -5283,7 +5341,7 @@ sap.ui.define([
                                             aAllCharValues.add(item.CHAR_CHARVALUE);
 
                                             var yearQuarter = item.YEAR_QUAETER;
-                                            var category = item.CHAR_DESC + " " + item.CHAR_CHARVALUE;
+                                            var category = item.CHAR_CHARVALUE;
                                             var key = yearQuarter + "|" + category;
 
                                             if (!groupedData[key]) {
@@ -5301,11 +5359,12 @@ sap.ui.define([
                                             groupedData[key].Forecast += item.CIR_QTY || 0;
                                         });
 
-                                        // --- Prepare chart data with combined label ---
+                                        // --- Prepare chart data ---
                                         var chartData = Object.values(groupedData).map(function (d) {
                                             var total = d.Sales + d.Unconsumed;
                                             return {
-                                                QuarterCharacteristic: d.YearQuarter + " | " + d.Category, // Combined label
+                                                YearQuarter: d.YearQuarter,   // separate field for grouping
+                                                Category: d.Category,         // separate field for subgroup
                                                 Sales: d.Sales > 0 ? d.Sales : null,
                                                 Unconsumed: d.Unconsumed,
                                                 Forecast: d.Forecast,
@@ -5314,18 +5373,20 @@ sap.ui.define([
                                         });
 
                                         console.log("Chart data prepared:", chartData);
+
+                                        // Optional sorting by characteristic
                                         chartData.sort((a, b) => {
-                                                    const textA = a.QuarterCharacteristic.split('|')[1].trim();
-                                                    const textB = b.QuarterCharacteristic.split('|')[1].trim();
-                                                    return textA.localeCompare(textB);
-                                                });
+                                            return a.Category.trim().localeCompare(b.Category.trim());
+                                        });
+
                                         // --- Set up model and dataset ---
                                         var oChartModel = new sap.ui.model.json.JSONModel({ CharData: chartData });
                                         var oVizFrame = that.byId("idCharChart");
 
                                         var oDataset = new sap.viz.ui5.data.FlattenedDataset({
                                             dimensions: [
-                                                { name: "Quarter / Characteristic", value: "{QuarterCharacteristic}" }
+                                                { name: "Quarter", value: "{YearQuarter}" },       // ✅ separate dimension
+                                                { name: "Characteristic", value: "{Category}" }    // ✅ separate dimension
                                             ],
                                             measures: [
                                                 { name: "Unconsumed", value: "{Unconsumed}" },
@@ -5343,7 +5404,7 @@ sap.ui.define([
                                         oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
                                             uid: "categoryAxis",
                                             type: "Dimension",
-                                            values: ["Quarter / Characteristic"]
+                                            values: ["Quarter", "Characteristic"] // 👈 Important for grouping
                                         }));
 
                                         oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
@@ -5365,7 +5426,11 @@ sap.ui.define([
                                             plotArea: {
                                                 primaryScale: { fixedRange: false, minValue: 0 },
                                                 secondaryScale: { fixedRange: false, minValue: 0 },
-                                                dataLabel: { visible: true, showTotal: true, formatString: "#,##0" },
+                                                dataLabel: {
+                                                    visible: true,
+                                                    showTotal: true,
+                                                    formatString: "#,##0"
+                                                },
                                                 dataPointStyle: {
                                                     rules: [
                                                         {
@@ -5380,7 +5445,11 @@ sap.ui.define([
                                                         },
                                                         {
                                                             dataContext: { Forecast: "*" },
-                                                            properties: { color: "#2196F3", lineColor: "#2196F3", lineWidth: 3 },
+                                                            properties: {
+                                                                color: "#2196F3",
+                                                                lineColor: "#2196F3",
+                                                                lineWidth: 3
+                                                            },
                                                             displayName: "Forecast"
                                                         }
                                                     ]
@@ -5388,7 +5457,7 @@ sap.ui.define([
                                                 dataShape: {
                                                     primaryAxis: ["bar", "bar"],
                                                     secondaryAxis: ["line"],
-                                                    isStacked: "true"
+                                                    isStacked: true
                                                 },
                                                 marker: { visible: true, size: 8 }
                                             },
@@ -5456,7 +5525,7 @@ sap.ui.define([
                                     console.log(error);
                                     that.showBusyIndicator(false);
                                     that.showErrorMessage(error);
-                                    
+
                                 }
                             });
 
@@ -5480,8 +5549,8 @@ sap.ui.define([
 
                         }, error: function (error) {
                             console.log(error);
-                                    that.showBusyIndicator(false);
-                                    that.showErrorMessage(error);
+                            that.showBusyIndicator(false);
+                            that.showErrorMessage(error);
 
                         }
                     })
@@ -5490,9 +5559,9 @@ sap.ui.define([
             }
             else {
                 {
-                     var baseFilter = `LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate} and WEEK_DATE le ${oEndDate})`;
-                baseFilter += ` and ${charcharvalFilter}`;
-                let sApply = `filter(${baseFilter})/groupby((CHAR_NUM,CHAR_VALUE),aggregate($count as Count))`;
+                    var baseFilter = `LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate} and WEEK_DATE le ${oEndDate})`;
+                    baseFilter += ` and ${charcharvalFilter}`;
+                    let sApply = `filter(${baseFilter})/groupby((CHAR_NUM,CHAR_VALUE),aggregate($count as Count))`;
                     that.oModel.read("/getPlannedOrdAnalysis", {
                         urlParameters: {
                             $apply: sApply, "$top": 100000
@@ -5670,13 +5739,14 @@ sap.ui.define([
                                                 var groupedData = {};
                                                 var aAllCharValues = new Set();
 
+                                                // --- Grouping raw data ---
                                                 finData.forEach(function (item) {
                                                     if (!item.CHAR_DESC || !item.CHAR_CHARVALUE || !item.YEAR_QUAETER) return;
 
                                                     aAllCharValues.add(item.CHAR_CHARVALUE);
 
                                                     var yearQuarter = item.YEAR_QUAETER;
-                                                    var category = item.CHAR_DESC + " " + item.CHAR_CHARVALUE;
+                                                    var category = item.CHAR_CHARVALUE;
                                                     var key = yearQuarter + "|" + category;
 
                                                     if (!groupedData[key]) {
@@ -5694,11 +5764,12 @@ sap.ui.define([
                                                     groupedData[key].Forecast += item.CIR_QTY || 0;
                                                 });
 
-                                                // --- Prepare chart data with combined label ---
+                                                // --- Prepare chart data ---
                                                 var chartData = Object.values(groupedData).map(function (d) {
                                                     var total = d.Sales + d.Unconsumed;
                                                     return {
-                                                        QuarterCharacteristic: d.YearQuarter + " | " + d.Category, // Combined label
+                                                        YearQuarter: d.YearQuarter,   // separate field for grouping
+                                                        Category: d.Category,         // separate field for subgroup
                                                         Sales: d.Sales > 0 ? d.Sales : null,
                                                         Unconsumed: d.Unconsumed,
                                                         Forecast: d.Forecast,
@@ -5707,18 +5778,20 @@ sap.ui.define([
                                                 });
 
                                                 console.log("Chart data prepared:", chartData);
+
+                                                // Optional sorting by characteristic
                                                 chartData.sort((a, b) => {
-                                                    const textA = a.QuarterCharacteristic.split('|')[1].trim();
-                                                    const textB = b.QuarterCharacteristic.split('|')[1].trim();
-                                                    return textA.localeCompare(textB);
+                                                    return a.Category.trim().localeCompare(b.Category.trim());
                                                 });
+
                                                 // --- Set up model and dataset ---
                                                 var oChartModel = new sap.ui.model.json.JSONModel({ CharData: chartData });
                                                 var oVizFrame = that.byId("idCharChart");
 
                                                 var oDataset = new sap.viz.ui5.data.FlattenedDataset({
                                                     dimensions: [
-                                                        { name: "Quarter / Characteristic", value: "{QuarterCharacteristic}" }
+                                                        { name: "Quarter", value: "{YearQuarter}" },       // ✅ separate dimension
+                                                        { name: "Characteristic", value: "{Category}" }    // ✅ separate dimension
                                                     ],
                                                     measures: [
                                                         { name: "Unconsumed", value: "{Unconsumed}" },
@@ -5736,7 +5809,7 @@ sap.ui.define([
                                                 oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
                                                     uid: "categoryAxis",
                                                     type: "Dimension",
-                                                    values: ["Quarter / Characteristic"]
+                                                    values: ["Quarter", "Characteristic"] // 👈 Important for grouping
                                                 }));
 
                                                 oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
@@ -5758,7 +5831,11 @@ sap.ui.define([
                                                     plotArea: {
                                                         primaryScale: { fixedRange: false, minValue: 0 },
                                                         secondaryScale: { fixedRange: false, minValue: 0 },
-                                                        dataLabel: { visible: true, showTotal: true, formatString: "#,##0" },
+                                                        dataLabel: {
+                                                            visible: true,
+                                                            showTotal: true,
+                                                            formatString: "#,##0"
+                                                        },
                                                         dataPointStyle: {
                                                             rules: [
                                                                 {
@@ -5773,7 +5850,11 @@ sap.ui.define([
                                                                 },
                                                                 {
                                                                     dataContext: { Forecast: "*" },
-                                                                    properties: { color: "#2196F3", lineColor: "#2196F3", lineWidth: 3 },
+                                                                    properties: {
+                                                                        color: "#2196F3",
+                                                                        lineColor: "#2196F3",
+                                                                        lineWidth: 3
+                                                                    },
                                                                     displayName: "Forecast"
                                                                 }
                                                             ]
@@ -5781,7 +5862,7 @@ sap.ui.define([
                                                         dataShape: {
                                                             primaryAxis: ["bar", "bar"],
                                                             secondaryAxis: ["line"],
-                                                            isStacked: "true"
+                                                            isStacked: true
                                                         },
                                                         marker: { visible: true, size: 8 }
                                                     },
@@ -5810,6 +5891,7 @@ sap.ui.define([
                                                         selectability: { mode: "exclusive" }
                                                     }
                                                 });
+
                                                 that.loadForecastChart();
                                                 that.loadActualChart()
                                                 that.showBusyIndicator(false);
@@ -5846,9 +5928,9 @@ sap.ui.define([
 
                                         },
                                         error: function (error) {
-                                             console.log(error);
-                                    that.showBusyIndicator(false);
-                                    that.showErrorMessage(error);
+                                            console.log(error);
+                                            that.showBusyIndicator(false);
+                                            that.showErrorMessage(error);
 
                                         }
                                     });
@@ -5878,9 +5960,9 @@ sap.ui.define([
                                 }
                             })
                         }, error: function (error) {
-                                console.log(error);
-                                    that.showBusyIndicator(false);
-                                    that.showErrorMessage(error);
+                            console.log(error);
+                            that.showBusyIndicator(false);
+                            that.showErrorMessage(error);
                         }
                     })
                     //    }
@@ -5897,3 +5979,4 @@ sap.ui.define([
 /////////redeploy 29-10-2025////
 ///////// Assembly Fields 30-10-2025 view//////////////
 ////////////MRP Filters/////////////
+//////////button changes and MRP Filters 05-11-2025/////

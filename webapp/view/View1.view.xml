@@ -303,9 +303,9 @@
                                 <Button
                                     id="charButton"
                                     text="Apply Filters"
-                                    type="Default"
+                                    type="Emphasized"
                                     press="onAppFilter"
-                                    width="100%"
+                                    width="40%"
                                 />
                             </VBox>
                             <HBox class="sapUiSmallMarginBegin">
@@ -378,7 +378,7 @@
                                         id="idMRPG"
                                         items="{path: 'mrpgModel>/items'}"
                                         showSelectAll="true"
-                                        width="300px"
+                                        width="250px"
                                     >
                                         <core:Item
                                             key="{${mrpgModel>MRP_GROUP}.toUpperCase() !== 'NULL' ? ${mrpgModel>MRP_GROUP} : 'NULL'}"
@@ -399,7 +399,8 @@
                                         id="idMRPT"
                                         items="{path: 'mrptModel>/items'}"
                                         showSelectAll="true"
-                                        width="300px"
+                                        width="250px"
+                                        
                                     >
                                         <core:Item
                                             key="{${mrptModel>MRP_TYPE}.toUpperCase() !== 'NULL' ? ${mrptModel>MRP_TYPE} : 'NULL'}"
@@ -414,7 +415,7 @@
                                         id="idAssembly"
                                         items="{path: 'asmbModel>/items'}"
                                         showSelectAll="true"
-                                        width="300px"
+                                        width="250px"
                                     >
                                         <core:Item
                                             key="{asmbModel>ASSEMBLY_DESCRIPTION}"
@@ -425,7 +426,8 @@
                     <ToolbarSeparator ></ToolbarSeparator>
                     <HBox >
                     <Button id="mrpButton" text="Apply Filters" type="Emphasized" press="onMRPFilters"></Button>
-                    <Button id="mrpClr" text="Clear Filters" type="Ghost" press="mrpClear" class="sapUiSmallMarginBegin"></Button>
+                    <!-- <ToolbarSeparator class="sapUiSmallMarginBegin sapUiTinyMarginTop" ></ToolbarSeparator> -->
+                    <Button id="mrpClr" text="Clear Filters" type="Emphasized" press="mrpClear" class="sapUiSmallMarginBegin"></Button>
                     </HBox>
                     </Toolbar>
                     </VBox>
