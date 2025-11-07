@@ -46,6 +46,7 @@ sap.ui.define([
 
 
                     var locationModel = new JSONModel(oData.results);
+                    locationModel.setSizeLimit(10000);
                     that.byId("idLocation").setModel(locationModel);
                     // console.log("Locations loaded:", loc);
 
@@ -175,6 +176,7 @@ sap.ui.define([
 
             // 1. Create and bind Location model
             var locationModel = new JSONModel(locationData);
+            locationModel.setSizeLimit(10000);
             this.byId("idLocation").setModel(locationModel);
             // this.byId("idLocation").setSelectedKey("1600");
             //    this.loadConfigProductsForLocation("1600");
@@ -431,10 +433,14 @@ sap.ui.define([
             ).map(id => ({ UNIQUE_ID: id }));
 
 
+
+
             const modelVModel = new JSONModel(modelVersions);
+            modelVModel.setSizeLimit(10000);
             that.byId("idModelVersion").setModel(modelVModel);
 
             const uidModel = new JSONModel(uniqueIDs);
+            uidModel.setSizeLimit(1000);
             that.byId("idUniqueID").setModel(uidModel);
 
             // Check if all mandatory fields are now filled
@@ -491,6 +497,7 @@ sap.ui.define([
             });
             var oMultiComboBox = that.byId("idMRPG");
             var mrpgModel = new JSONModel({ items: mrpgData });
+            mrpgModel.setSizeLimit(10000);
             // that.byId("idAssembly").setModel(asmbData);
             oMultiComboBox.unbindItems();
             oMultiComboBox.removeAllItems();
@@ -569,6 +576,7 @@ sap.ui.define([
             });
             var oMultiComboBox = that.byId("idMRPT");
             var mrptModel = new JSONModel({ items: mrptData });
+            mrptModel.setSizeLimit(10000);
             // that.byId("idAssembly").setModel(asmbData);
             oMultiComboBox.unbindItems();
             oMultiComboBox.removeAllItems();
@@ -662,6 +670,7 @@ sap.ui.define([
                 return valA.localeCompare(valB);
             });
             var asmbModel = new JSONModel({ items: asmbData });
+            asmbModel.setSizeLimit(10000);
             // that.byId("idAssembly").setModel(asmbData);
             oMultiComboBox.unbindItems();
             oMultiComboBox.removeAllItems();
@@ -878,6 +887,7 @@ sap.ui.define([
                     that.byId("idModelVersion").setSelectedKeys([]);
 
                     const prodModel = new JSONModel(oData.results)
+                    prodModel.setSizeLimit(10000);
                     that.byId("idProduct").setSelectedKey();
 
                     that.byId("idProduct").setModel(prodModel);
@@ -945,6 +955,7 @@ sap.ui.define([
                 let configModel = this.getView().getModel("configModel");
                 if (!configModel) {
                     configModel = new JSONModel({ ConfigProducts: [] });
+                    configModel.setSizeLimit(10000);
                     this.getView().setModel(configModel, "configModel");
                 }
 
@@ -1019,6 +1030,7 @@ sap.ui.define([
                 success: function (oData) {
                     //         console.log(oData)
                     const prodModel = new JSONModel(oData.results)
+                    prodModel.setSizeLimit(10000);
                     that.byId("idProduct").setModel(prodModel);
                 },
                 error: function (error) {
@@ -1382,6 +1394,7 @@ sap.ui.define([
 
                     // --- Set up model and dataset ---
                     var oChartModel = new sap.ui.model.json.JSONModel({ CharData: chartData });
+                    oChartModel.setSizeLimit(10000);
                     var oVizFrame = that.byId("idCharChart");
 
                     var oDataset = new sap.viz.ui5.data.FlattenedDataset({
@@ -1569,6 +1582,7 @@ sap.ui.define([
 
                     var aChartData = Object.values(groupedData);
                     var oChartModel = new sap.ui.model.json.JSONModel({ chartData: aChartData });
+                    oChartModel.setSizeLimit(10000);
                     var oVizFrame = that.byId("idVizFrame");
                     oVizFrame.setModel(oChartModel);
                     // Configure the VizFrame for stacked bars
@@ -1959,7 +1973,7 @@ sap.ui.define([
 
                     // Bind CHAR_DESC to dropdown
                     this.byId("idCharacteristics").setModel(new sap.ui.model.json.JSONModel({ Characteristics: aFormatted }), "charModel");
-
+                     this.byId("idCharacteristics").getModel().setSizeLimit(10000);
                     that._selectAllCharacteristics();
 
                     console.log("CHAR_DESC loaded:", aFormatted.length);
@@ -2496,6 +2510,7 @@ sap.ui.define([
                     aFormattedValues.unshift({ key: "ALL", text: "Select All", desc: "Select All" });
 
                     var oCharValModel = new sap.ui.model.json.JSONModel({ CharValNum: aFormattedValues });
+                    oCharValModel.setSizeLimit(10000);
                     var oCharValCtrl = that.byId("idCharValNum");
                     oCharValCtrl.setModel(oCharValModel, "charValModel");
 
@@ -2609,6 +2624,7 @@ sap.ui.define([
                     var oDepModel = this.getView().getModel("dependentModel");
                     if (!oDepModel) {
                         oDepModel = new sap.ui.model.json.JSONModel({});
+                        
                         this.getView().setModel(oDepModel, "dependentModel");
                     }
 
@@ -2717,7 +2733,7 @@ sap.ui.define([
                     var oChartModel = new sap.ui.model.json.JSONModel({
                         chartData: aChartData
                     });
-
+                        oChartModel.setSizeLimit(10000);
                     var oVizFrame = that.byId("idVizFrame");
                     oVizFrame.setModel(oChartModel);
 
@@ -4254,6 +4270,7 @@ sap.ui.define([
                             aFormattedCharValues.unshift({ key: "Select All", text: "Select All" });
 
                             oCharValCtrl.setModel(new sap.ui.model.json.JSONModel({ CharValNum: aFormattedCharValues }));
+                            oCharValCtrl.setSizeLimit(10000);
                             oCharValCtrl.getItems().forEach(function (item) {
                                 oCharValCtrl.setSelectedItem(item, true);
                             });
@@ -4415,6 +4432,7 @@ sap.ui.define([
                     var oChartModel = new sap.ui.model.json.JSONModel({
                         ForecastChartData: aChartData
                     });
+                    oChartModel.setSizeLimit(10000);
                     that.byId("idForecastChart").setModel(oChartModel);
 
                     // Hide chart title
@@ -4605,6 +4623,7 @@ sap.ui.define([
                     var oChartModel = new sap.ui.model.json.JSONModel({
                         ForecastChartData: aChartData
                     });
+                    oChartModel.setSizeLimit(10000);
                     that.byId("idForecastChart").setModel(oChartModel);
 
                     // Hide chart title
@@ -4786,6 +4805,8 @@ sap.ui.define([
                     var oChartModel = new sap.ui.model.json.JSONModel({
                         ActualChartData: aChartData
                     });
+
+                    oChartModel.setSizeLimit(10000);
                     that.byId("idActualChart").setModel(oChartModel);
 
                     var oVizFrame = that.getView().byId("idActualChart");
@@ -4956,6 +4977,7 @@ sap.ui.define([
                     var oChartModel = new sap.ui.model.json.JSONModel({
                         ActualChartData: aChartData
                     });
+                    oChartModel.setSizeLimit(10000);
                     that.byId("idActualChart").setModel(oChartModel);
 
                     var oVizFrame = that.getView().byId("idActualChart");
@@ -5022,7 +5044,7 @@ sap.ui.define([
             var oChartModel = new sap.ui.model.json.JSONModel({
                 ProductData: chartData
             });
-
+            oChartModel.setSizeLimit(10000);
             this.getView().setModel(oChartModel);
             console.log("Chart model set with", chartData.length, "records");
         },
@@ -5231,6 +5253,7 @@ sap.ui.define([
 
                                         var aChartData = Object.values(groupedData);
                                         var oChartModel = new sap.ui.model.json.JSONModel({ chartData: aChartData });
+                                        oChartModel.setSizeLimit(10000);
                                         var oVizFrame = that.byId("idVizFrame");
                                         oVizFrame.setModel(oChartModel);
                                         // Configure the VizFrame for stacked bars
@@ -5381,6 +5404,7 @@ sap.ui.define([
 
                                         // --- Set up model and dataset ---
                                         var oChartModel = new sap.ui.model.json.JSONModel({ CharData: chartData });
+                                        oChartModel.setSizeLimit(10000);
                                         var oVizFrame = that.byId("idCharChart");
 
                                         var oDataset = new sap.viz.ui5.data.FlattenedDataset({
@@ -5635,6 +5659,7 @@ sap.ui.define([
 
                                                 var aChartData = Object.values(groupedData);
                                                 var oChartModel = new sap.ui.model.json.JSONModel({ chartData: aChartData });
+                                                oChartModel.setSizeLimit(10000);
                                                 var oVizFrame = that.byId("idVizFrame");
                                                 oVizFrame.setModel(oChartModel);
                                                 // Configure the VizFrame for stacked bars
@@ -5786,6 +5811,7 @@ sap.ui.define([
 
                                                 // --- Set up model and dataset ---
                                                 var oChartModel = new sap.ui.model.json.JSONModel({ CharData: chartData });
+                                                oChartModel.setSizeLimit(10000);
                                                 var oVizFrame = that.byId("idCharChart");
 
                                                 var oDataset = new sap.viz.ui5.data.FlattenedDataset({
@@ -5980,3 +6006,4 @@ sap.ui.define([
 ///////// Assembly Fields 30-10-2025 view//////////////
 ////////////MRP Filters/////////////
 //////////button changes and MRP Filters 05-11-2025/////
+////////////////Combobox Data limit Increase 07-11-2025//////////////
