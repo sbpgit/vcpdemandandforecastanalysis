@@ -9,7 +9,7 @@ sap.ui.define([
     "use strict";
     var that;
     return Controller.extend("sacforecastorder.sacforecastorder.controller.View1", {
-        _bCharValProgrammatic: false,
+         _bCharValProgrammatic: false,
         _bLoadingCharacteristics: false,
         _bCharSelectionInProgress: false,
         _bCharValInitialLoad: true,
@@ -198,6 +198,7 @@ sap.ui.define([
             var configModel = new JSONModel({
                 ConfigProducts: []
             });
+            configModel.setSizeLimit(10000);
             this.getView().setModel(configModel, "configModel");
             console.log("Empty config model created");
 
@@ -207,6 +208,7 @@ sap.ui.define([
                 ModelVersions: [],
                 UniqueIDs: []
             });
+            emptyDependentModel.setSizeLimit(10000);
             this.getView().setModel(emptyDependentModel, "dependentModel");
             console.log("Empty dependent model created");
 
@@ -294,6 +296,7 @@ sap.ui.define([
             var oCharCtrl = this.byId("idCharacteristics");
             if (oCharCtrl) {
                 oCharCtrl.setModel(new sap.ui.model.json.JSONModel({ Characteristics: [] }), "charModel");
+                oCharCtrl.getModel().setSizeLimit(10000);
                 if (oCharCtrl.removeAllSelectedItems) {
                     oCharCtrl.removeAllSelectedItems();
                 }
@@ -303,6 +306,7 @@ sap.ui.define([
             var oCharValCtrl = this.byId("idCharValNum");
             if (oCharValCtrl) {
                 oCharValCtrl.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }));
+                oCharValCtrl.getModel().setSizeLimit(10000);
                 if (oCharValCtrl.removeAllSelectedItems) {
                     oCharValCtrl.removeAllSelectedItems();
                 }
@@ -332,7 +336,7 @@ sap.ui.define([
             const dependentModel = this.getView().getModel("dependentModel") || new JSONModel({
                 Products: [], ModelVersions: [], UniqueIDs: []
             });
-
+            dependentModel.setSizeLimit(10000);
             dependentModel.setData({
                 Products: products,
                 ModelVersions: modelVersions,
@@ -440,7 +444,7 @@ sap.ui.define([
             that.byId("idModelVersion").setModel(modelVModel);
 
             const uidModel = new JSONModel(uniqueIDs);
-            uidModel.setSizeLimit(1000);
+            uidModel.setSizeLimit(10000);
             that.byId("idUniqueID").setModel(uidModel);
 
             // Check if all mandatory fields are now filled
@@ -1513,6 +1517,7 @@ sap.ui.define([
                             aFormattedCharValues.unshift({ key: "Select All", text: "Select All" });
 
                             oCharValCtrl.setModel(new sap.ui.model.json.JSONModel({ CharValNum: aFormattedCharValues }));
+                            oCharValCtrl.getModel().setSizeLimit(10000);
                             oCharValCtrl.getItems().forEach(function (item) {
                                 oCharValCtrl.setSelectedItem(item, true);
                             });
@@ -2035,11 +2040,13 @@ sap.ui.define([
                     if (oCharValNum) {
                         oCharValNum.unbindItems();
                         oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
+                        oCharValNum.getModel().setSizeLimit(10000);
                     }
 
                     if (oCharChart) {
                         oCharChart.unbindElement();
                         oCharChart.setModel(new sap.ui.model.json.JSONModel({ CharData: [] }));
+                        oCharChart.getModel().setSizeLimit(10000);
                     }
                     // this._clearUniqueIDSelection();
                 }
@@ -2194,6 +2201,7 @@ sap.ui.define([
                         if (oCharValNum) {
                             oCharValNum.unbindItems();
                             oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
+                            oCharValNum.getModel().setSizeLimit(10000);
                         }
 
                         // if (oCharChart) {
@@ -2222,6 +2230,7 @@ sap.ui.define([
                     if (oCharValNum) {
                         oCharValNum.unbindItems();
                         oCharValNum.setModel(new sap.ui.model.json.JSONModel({ CharValNum: [] }), "charValModel");
+                        oCharValNum.getModel().setSizeLimit(10000);
                     }
 
                     // if (oCharChart) {
@@ -2624,6 +2633,7 @@ sap.ui.define([
                     var oDepModel = this.getView().getModel("dependentModel");
                     if (!oDepModel) {
                         oDepModel = new sap.ui.model.json.JSONModel({});
+                        oDepModel.setSizeLimit(10000);
                         
                         this.getView().setModel(oDepModel, "dependentModel");
                     }
@@ -2994,6 +3004,7 @@ sap.ui.define([
                     var oDepModel = this.getView().getModel("dependentModel");
                     if (!oDepModel) {
                         oDepModel = new sap.ui.model.json.JSONModel({});
+                        oDepModel.setSizeLimit(10000);
                         this.getView().setModel(oDepModel, "dependentModel");
                     }
 
@@ -3098,6 +3109,7 @@ sap.ui.define([
                     var oDepModel = that.getView().getModel("dependentModel");
                     if (!oDepModel) {
                         oDepModel = new sap.ui.model.json.JSONModel({});
+                        oDepModel.setSizeLimit(10000);
                         that.getView().setModel(oDepModel, "dependentModel");
                     }
 
@@ -3273,6 +3285,7 @@ sap.ui.define([
                     that._bCharValProgrammatic = true;
 
                     var oCharValModel = new sap.ui.model.json.JSONModel({ CharValNum: aListData });
+                    oCharValModel.setSizeLimit(10000);
                     oCharValList.setModel(oCharValModel, "charValModel");
 
                     // Unbind first to prevent event cascading
@@ -3512,6 +3525,7 @@ sap.ui.define([
                     var aFormattedUniqueIds = allIds.map(u => ({ key: u, text: String(u) }));
 
                     var oDepModel = this.getView().getModel("dependentModel");
+                    oDepModel.setSizeLimit(10000);
                     if (!oDepModel) {
                         oDepModel = new sap.ui.model.json.JSONModel({ UniqueIDs: aFormattedUniqueIds });
                         this.getView().setModel(oDepModel, "dependentModel");
@@ -4270,7 +4284,7 @@ sap.ui.define([
                             aFormattedCharValues.unshift({ key: "Select All", text: "Select All" });
 
                             oCharValCtrl.setModel(new sap.ui.model.json.JSONModel({ CharValNum: aFormattedCharValues }));
-                            oCharValCtrl.setSizeLimit(10000);
+                            oCharValCtrl.getModel().setSizeLimit(10000);
                             oCharValCtrl.getItems().forEach(function (item) {
                                 oCharValCtrl.setSelectedItem(item, true);
                             });
@@ -5064,6 +5078,7 @@ sap.ui.define([
             const dependentModel = this.getView().getModel("dependentModel") || new JSONModel({
                 Products: [], ModelVersions: [], UniqueIDs: []
             });
+            dependentModel.setSizeLimit(10000);
 
             dependentModel.setData({
                 Products: products,
@@ -5630,7 +5645,8 @@ sap.ui.define([
                                         return;
                                     }
                                     that.chartfinData = finData;
-                                    const unique = finData.map(id => `UNIQUE_ID eq ${JSON.parse(id.UNIQUE_ID)}`).join(' or ');
+                                    const uniData = [...new Set(finData.map(item => item.UNIQUE_ID))];
+                                    const unique = uniData.map(id => `UNIQUE_ID eq ${id}`).join(' or ');
                                     that.oModel.read("/getCirGen", {
                                         urlParameters: {
                                             $apply: `filter(LOCATION_ID eq '${selectedLocation}'  and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate} and WEEK_DATE le ${oEndDate}) and (${unique}))`,
@@ -6001,9 +6017,9 @@ sap.ui.define([
     });
 });
 
-
 /////////redeploy 29-10-2025////
 ///////// Assembly Fields 30-10-2025 view//////////////
 ////////////MRP Filters/////////////
 //////////button changes and MRP Filters 05-11-2025/////
 ////////////////Combobox Data limit Increase 07-11-2025//////////////
+////////////////Apply Filter issue////////////////////////
