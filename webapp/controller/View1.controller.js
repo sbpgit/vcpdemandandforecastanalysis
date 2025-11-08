@@ -1147,8 +1147,8 @@ sap.ui.define([
         },
 
         onApplyFilters: async function (oEvent) {
-            if (this.byId("idLocation").getSelectedKey().length == 0) {
-                // that.showErrorMessage("Mandatory Fields not Selected");
+            if (this.byId("idLocation").getSelectedKey().length == 0 ||this.byId("idConfigProduct").getSelectedKey().length == 0 || this.byId("idProduct").getSelectedKey().length == 0  ) {
+                sap.m.MessageToast.show("Mandatory Fields not Selected");
                 that.showBusyIndicator(false);
                 return;
             }
@@ -6022,4 +6022,4 @@ sap.ui.define([
 ////////////MRP Filters/////////////
 //////////button changes and MRP Filters 05-11-2025/////
 ////////////////Combobox Data limit Increase 07-11-2025//////////////
-////////////////Apply Filter issue////////////////////////
+////////////////Apply Filter issue & error display 08-11-2025////////////////////////
