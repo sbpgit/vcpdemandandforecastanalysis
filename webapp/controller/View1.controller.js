@@ -1149,7 +1149,7 @@ sap.ui.define([
         onApplyFilters: async function (oEvent) {
             if (this.byId("idLocation").getSelectedKey().length == 0 ||this.byId("idConfigProduct").getSelectedKey().length == 0 || this.byId("idProduct").getSelectedKey().length == 0  ) {
                 sap.m.MessageToast.show("Mandatory Fields not Selected");
-                that.showBusyIndicator(false);
+                this.showBusyIndicator(false);
                 return;
             }
             var oView = this.getView();
