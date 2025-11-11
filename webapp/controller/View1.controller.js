@@ -1198,10 +1198,10 @@ sap.ui.define([
                 oView.byId("idProduct").setSelectedKey(sProduct);
             }
             // Validate
-            if (!sLocation || !sProduct || !oStartDate || !oEndDate) {
-                sap.m.MessageToast.show("Please fill all mandatory fields before proceeding.");
-                return;
-            }
+            // if (!sLocation || !sProduct || !oStartDate || !oEndDate) {
+            //     sap.m.MessageToast.show("Please fill all mandatory fields before proceeding.");
+            //     return;
+            // }
 
             this._bInitialLoadInProgress = true;
 
@@ -1338,21 +1338,21 @@ sap.ui.define([
                         }
 
                     } else {
-                        sap.m.MessageToast.show("No Unique IDs found for selected product and date range.");
+                        sap.m.MessageToast.show("No Data");
                         that._bInitialLoadInProgress = false;
                         that._loadCirGenChartAndCharacteristics(sLocation, sProduct, oStartDate, oEndDate, []);
                     }
                     that.byId("idMRPG").setSelectedKeys([]);
                     that.byId("idMRPT").setSelectedKeys([]);
                     that.byId("idAssembly").setSelectedKeys([]);
-                    that.onOpenMRPG();
-                    that.onOpenMRPT();
-                    that.onOpenAsmb();
+                    // that.onOpenMRPG();
+                    // that.onOpenMRPT();
+                    // that.onOpenAsmb();
                    
                 },
                 error: function (oError) {
                     console.error("Error fetching Unique IDs", oError);
-                    sap.m.MessageToast.show("Error loading Unique IDs");
+                    sap.m.MessageToast.show("Error fetching Data", oError);
                     that._bInitialLoadInProgress = false;
                     that._loadCirGenChartAndCharacteristics(sLocation, sProduct, oStartDate, oEndDate, []);
                 }
@@ -1570,7 +1570,7 @@ sap.ui.define([
                 }.bind(this),
                 error: function (oError) {
                     console.error("Error fetching chart data:", oError);
-                    this.showErrorMessage("Failed to load chart data");
+                    this.showErrorMessage("Error fetching data:", oError);
                     this.showBusyIndicator(false);
                 }.bind(this)
             });
@@ -1606,7 +1606,7 @@ sap.ui.define([
                 },
                 success: function (oData) {
                     if (!oData.results.length) {
-                        sap.m.MessageToast.show("No data found for the selected filters.");
+                        sap.m.MessageToast.show("No Data");
                         that._bInitialLoadInProgress = false;
                         return;
                     }
@@ -1775,7 +1775,7 @@ sap.ui.define([
                 error: function (oError) {
                     console.error("Error fetching CirGen data", oError);
                     that._bInitialLoadInProgress = false;
-                    sap.m.MessageToast.show("Error loading chart data");
+                    sap.m.MessageToast.show("Error fetching data", oError);
                 }
             });
         },
@@ -2028,7 +2028,7 @@ sap.ui.define([
                 }.bind(this),
                 error: function (oError) {
                     console.error("Error loading characteristics:", oError);
-                    this.showErrorMessage("Failed to load characteristics");
+                    this.showErrorMessage("Error loading characteristics:", oError);
                     this.showBusyIndicator(false);
                 }.bind(this)
             });
@@ -4359,7 +4359,7 @@ sap.ui.define([
                 }.bind(this),
                 error: function (oError) {
                     console.error("Error fetching chart data:", oError);
-                    this.showErrorMessage("Failed to load chart data");
+                    this.showErrorMessage("Error fetching data:", oError);
                     this.showBusyIndicator(false);
                 }.bind(this)
             });
@@ -4610,12 +4610,12 @@ sap.ui.define([
                     //         visible: false // hides the title
                     //     }
                     // });
-
+                    that.MRP();
                     that.showBusyIndicator(false);
                 },
                 error: function (oError) {
                     console.error("Error loading forecast chart data:", oError);
-                    that.showErrorMessage("Failed to load forecast chart data");
+                    that.showErrorMessage("Error loading data:", oError);
                     that.showBusyIndicator(false);
                 }
             });
@@ -4739,7 +4739,7 @@ sap.ui.define([
                 },
                 error: function (oError) {
                     console.error("Error loading forecast chart data:", oError);
-                    that.showErrorMessage("Failed to load forecast chart data");
+                    that.showErrorMessage("Error loading data:", oError);
                     that.showBusyIndicator(false);
                 }
             });
@@ -4982,7 +4982,7 @@ sap.ui.define([
                 },
                 error: function (oError) {
                     console.error("Error loading actual chart data:", oError);
-                    that.showErrorMessage("Failed to load actual chart data");
+                    that.showErrorMessage("Error loading data:", oError);
                     that.showBusyIndicator(false);
                 }
             });
@@ -5253,10 +5253,11 @@ sap.ui.define([
             return fetchData();
         },
         onAppFilter: function (oEvent) {
-            if (this.byId("idLocation").getSelectedKey().length == 0) {
+            if (this.byId("idLocation").getSelectedKey().length == 0 ||this.byId("idConfigProduct").getSelectedKey().length == 0 || this.byId("idProduct").getSelectedKey().length == 0   ||  this.byId("idCharacteristics").getSelectedItems().length == 0) {
                 that.showBusyIndicator(false);
                 return;
             }
+             try {
             var selectedLocation = that.byId("idLocation").getSelectedKey();
             var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
             var sSelectedProduct = that.byId("idProduct").getSelectedKey();
@@ -5621,7 +5622,8 @@ sap.ui.define([
 
 
                                     }
-
+                                    
+                               
                                 },
                                 error: function (error) {
                                     console.log(error);
@@ -6076,9 +6078,147 @@ sap.ui.define([
             that.byId("idMRPG").setSelectedKeys([]);
             that.byId("idMRPT").setSelectedKeys([]);
             that.byId("idAssembly").setSelectedKeys([]);
-             that.onOpenMRPG();
-                    that.onOpenMRPT();
-                    that.onOpenAsmb();
+            //  that.onOpenMRPG();
+            //         that.onOpenMRPT();
+            //         that.onOpenAsmb();
+             } catch (error) {
+                
+                this.showBusyIndicator(false);
+                sap.m.MessageToast.show(error);
+            } finally {
+                this.showBusyIndicator(false);
+            }
+        },
+        MRP: async function(oEvent){
+            var selectedLocation = that.byId("idLocation").getSelectedKey();
+            var sSelectedConfigProduct = that.byId("idConfigProduct").getSelectedKey();
+            var sSelectedProduct = that.byId("idProduct").getSelectedKey();
+            var sSelectModelVersion = that.byId("idModelVersion").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            var oStartDate = this.byId("DRS1").getDateValue();
+            var oEndDate = this.byId("DRS1").getSecondDateValue();
+            var uniques = [];
+            if (that.applyFilterData.length > 0) {
+                that.applyFilterData.forEach(x => {
+                    uniques.push(x.UNIQUE_ID)
+                })
+                var sSelectUniqueId = [...new Set(uniques)];
+            }
+            else {
+                var sSelectUniqueId = that.byId("idUniqueID").getSelectedKeys().filter(mv => mv && mv.trim() !== "");
+            }
+            // console.log("Selected Product:", sSelectedProduct);
+            that.showBusyIndicator(true);
+            const modVer = sSelectModelVersion.map(id => `MODEL_VERSION eq '${id}'`).join(' or ');
+            const unique = sSelectUniqueId.map(id => `UNIQUE_ID eq ${JSON.parse(id)}`).join(' or ');
+            var baseFilter = `LOCATION_ID eq '${selectedLocation}' and PRODUCT_ID eq '${sSelectedProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")})`;
+
+            if (sSelectModelVersion.length > 0) {
+                baseFilter += ` and (${modVer})`;
+            }
+            if (sSelectUniqueId.length > 0) {
+                baseFilter += ` and (${unique})`;
+            }
+
+            let sApply = `filter(${baseFilter})/groupby((MRP_GROUP))`;
+            const mrpgData = await that.readModel("getAsmbReqAnalysis", {
+                $apply: sApply,
+                $top: 100000,
+            });
+            mrpgData.forEach(x => {
+                if (x.MRP_GROUP == null) {
+                    x.MRP_GROUP = "null";
+                }
+            })
+            mrpgData.sort((a, b) => {
+                const valA = (a.MRP_GROUP || '').toString();
+                const valB = (b.MRP_GROUP || '').toString();
+                return valA.localeCompare(valB);
+            });
+            var oMultiComboBox = that.byId("idMRPG");
+            var mrpgModel = new JSONModel({ items: mrpgData });
+            mrpgModel.setSizeLimit(10000);
+            // that.byId("idAssembly").setModel(asmbData);
+            oMultiComboBox.unbindItems();
+            oMultiComboBox.removeAllItems();
+
+            oMultiComboBox.setModel(mrpgModel, "mrpgModel");
+
+            // Make sure MultiComboBox is bound to correct path
+
+            oMultiComboBox.bindItems({
+                path: "mrpgModel>/items",  // Path must not be undefined
+                template: new sap.ui.core.Item({
+                    key: "{mrpgModel>MRP_GROUP}",
+                    text: "{mrpgModel>MRP_GROUP}"
+                })
+            });
+
+            /////////////////////////
+
+              let sApply1 = `filter(${baseFilter})/groupby((MRP_TYPE))`;
+            const mrptData = await that.readModel("getAsmbReqAnalysis", {
+                $apply: sApply1,
+                $top: 100000,
+            });
+            mrptData.forEach(x => {
+                if (x.MRP_TYPE == null) {
+                    x.MRP_TYPE = "null";
+                }
+            })
+            mrptData.sort((a, b) => {
+                const valA = (a.MRP_TYPE || '').toString();
+                const valB = (b.MRP_TYPE || '').toString();
+                return valA.localeCompare(valB);
+            });
+            var oMultiComboBox = that.byId("idMRPT");
+            var mrptModel = new JSONModel({ items: mrptData });
+            mrptModel.setSizeLimit(10000);
+            // that.byId("idAssembly").setModel(asmbData);
+            oMultiComboBox.unbindItems();
+            oMultiComboBox.removeAllItems();
+
+            oMultiComboBox.setModel(mrptModel, "mrptModel");
+
+            // Make sure MultiComboBox is bound to correct path
+
+            oMultiComboBox.bindItems({
+                path: "mrptModel>/items",  // Path must not be undefined
+                template: new sap.ui.core.Item({
+                    key: "{mrptModel>MRP_TYPE}",
+                    text: "{mrptModel>MRP_TYPE}"
+                })
+            });
+
+            ///////////////////////////////////
+             let sApply2 = `filter(${baseFilter})/groupby((ASSEMBLY_DESCRIPTION))`;
+            const asmbData = await that.readModel("getAsmbReqAnalysis", {
+                $apply: sApply2,
+                $top: 100000,
+            });
+            var oMultiComboBox = that.byId("idAssembly");
+            asmbData.sort((a, b) => {
+                const valA = (a.ASSEMBLY_DESCRIPTION || '').toString();
+                const valB = (b.ASSEMBLY_DESCRIPTION || '').toString();
+                return valA.localeCompare(valB);
+            });
+            var asmbModel = new JSONModel({ items: asmbData });
+            asmbModel.setSizeLimit(10000);
+            // that.byId("idAssembly").setModel(asmbData);
+            oMultiComboBox.unbindItems();
+            oMultiComboBox.removeAllItems();
+            oMultiComboBox.setModel(asmbModel, "asmbModel");
+
+            // Make sure MultiComboBox is bound to correct path
+
+
+            oMultiComboBox.bindItems({
+                path: "asmbModel>/items",  // Path must not be undefined
+                template: new sap.ui.core.Item({
+                    key: "{asmbModel>ASSEMBLY_DESCRIPTION}",
+                    text: "{asmbModel>ASSEMBLY_DESCRIPTION}"
+                })
+            });
+            that.showBusyIndicator(false);
         }
     });
 });
@@ -6090,3 +6230,4 @@ sap.ui.define([
 ////////////////Combobox Data limit Increase 07-11-2025//////////////
 ////////////////Apply Filter issue & error display 08-11-2025////////////////////////
 ///////////////// Descriptions 10-11-2025////////////////////////////////////////
+/////////////////Error Descriptions change 11-11-2025///////////////
