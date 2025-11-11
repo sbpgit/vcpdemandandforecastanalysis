@@ -15,8 +15,9 @@ sap.ui.define([
         _bCharValInitialLoad: true,
         _bUniqueIDSelectionInProgress: false,
         _bInitialLoadInProgress: false,
+        
         onInit() {
-
+                this._lastClickTime = 0;
             that = this;
             that.SelectedAll = false;
             that.oModel = that.getOwnerComponent().getModel("oModel");
@@ -33,18 +34,16 @@ sap.ui.define([
             // const loc = await that.readModel("getPlannedOrdAnalysis", {
             //     $apply: 'groupby((LOCATION_ID),aggregate($count as Count))'
             // });
-
-            that.oModel.read("/getPlannedOrdAnalysis", {
+            
+            that.oModel.read("/getfactorylocdesc", {
                 // filters: aFilters,
                 urlParameters: {
-                    $apply: 'groupby((LOCATION_ID),aggregate($count as Count))',
+                    $apply: 'groupby((DEMAND_LOC,DEMAND_DESC),aggregate($count as Count))',
                     // "$select": "WEEK_DATE,ASSEMBLY_DESC,CIR_QTY,COUNT",
                     "$top": 100000
                 },
                 success: function (oData) {
-                    console.log(oData);
-
-
+                    console.log(oData)
                     var locationModel = new JSONModel(oData.results);
                     locationModel.setSizeLimit(10000);
                     that.byId("idLocation").setModel(locationModel);
@@ -57,16 +56,45 @@ sap.ui.define([
                     // this.bindDataToView(loc);
                     that.showBusyIndicator(false);
 
-                    // console.log("onInit completed without default selections");
                 },
-                error: function (error) {
-                    console.log(error);
+                error:function(err){
+                    console.log(err);
                 }
-
             });
+            // that.oModel.read("/getPlannedOrdAnalysis", {
+            //     // filters: aFilters,
+            //     urlParameters: {
+            //         $apply: 'groupby((LOCATION_ID),aggregate($count as Count))',
+            //         // "$select": "WEEK_DATE,ASSEMBLY_DESC,CIR_QTY,COUNT",
+            //         "$top": 100000
+            //     },
+            //     success: function (oData) {
+            //         console.log(oData);
+
+
+            //         var locationModel = new JSONModel(oData.results);
+            //         locationModel.setSizeLimit(10000);
+            //         that.byId("idLocation").setModel(locationModel);
+            //         // console.log("Locations loaded:", loc);
+
+            //         that.byId("idLocation").setSelectedKey("");
+            //         // this.byId("idLocation").setForceSelection(false);
+
+            //         // Bind initial data to view - NO DEFAULT SELECTION
+            //         // this.bindDataToView(loc);
+            //         that.showBusyIndicator(false);
+
+            //         // console.log("onInit completed without default selections");
+            //     },
+            //     error: function (error) {
+            //         console.log(error);
+            //     }
+
+            // });
             that.attachDynamicLoader("idMRPG", "onOpenMRPG", "MRPG");
             that.attachDynamicLoader("idMRPT", "onOpenMRPT", "MRPT");
             that.attachDynamicLoader("idAssembly", "onOpenAsmb", "ASSEMBLY");
+            // that.byId("idMRPG").attachSuggest(that.onOpenMRPG, that);
 
 
             // } catch (error) {
@@ -219,7 +247,8 @@ sap.ui.define([
 
         // Event handlers with detailed logging
         onLocationChange: function (oEvent) {
-            var selectedItem = oEvent.getParameter("selectedItem");
+            // var selectedItem = oEvent.getParameter("selectedItem");
+             var selectedItem =oEvent.oSource.getSelectedItem()
             if (!selectedItem) {
                 this.clearAllDependentDropdowns();
                 this.clearAllCharts();
@@ -879,9 +908,9 @@ sap.ui.define([
             //  const prodData = await this.readModel("getPlannedOrdAnalysis", {
             //         $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID),aggregate($count as Count))`
             //     });
-            that.oModel.read("/getPlannedOrdAnalysis", {
+                 that.oModel.read("/getfactorylocdesc", {
                 urlParameters: {
-                    $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID),aggregate($count as Count))`
+                    $apply: `filter(DEMAND_LOC eq '${selectedLocation}' and REF_PRODID eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID,PROD_DESC))`
 
                 },
                 success: function (oData) {
@@ -945,15 +974,20 @@ sap.ui.define([
             try {
                 this.showBusyIndicator(true);
 
-                const configData = await this.readModel("getPlannedOrdAnalysis", {
-                    $apply: `filter(LOCATION_ID eq '${locationId}')/groupby((CONFIGURATION_PRODUCT),aggregate($count as Count))`
+                // const configData = await this.readModel("getPlannedOrdAnalysis", {
+                //     $apply: `filter(LOCATION_ID eq '${locationId}')/groupby((CONFIGURATION_PRODUCT),aggregate($count as Count))`
+                // });
+
+                   const configData = await this.readModel("getfactorylocdesc", {
+                    $apply: `filter(DEMAND_LOC eq '${locationId}')/groupby((REF_PRODID,REFPROD_DESC))`
                 });
 
                 console.log("Config products loaded:", configData.length);
 
                 const formattedConfigData = configData.map(item => ({
-                    key: item.CONFIGURATION_PRODUCT,
-                    text: item.CONFIGURATION_PRODUCT
+                    key: item.REF_PRODID,
+                    text: item.REF_PRODID,
+                    desc:item.REFPROD_DESC
                 }));
 
                 let configModel = this.getView().getModel("configModel");
@@ -1148,7 +1182,7 @@ sap.ui.define([
 
         onApplyFilters: async function (oEvent) {
             if (this.byId("idLocation").getSelectedKey().length == 0 ||this.byId("idConfigProduct").getSelectedKey().length == 0 || this.byId("idProduct").getSelectedKey().length == 0  ) {
-                sap.m.MessageToast.show("Mandatory Fields not Selected");
+                sap.m.MessageToast.show("Select Mandatory Fields");
                 this.showBusyIndicator(false);
                 return;
             }
@@ -1308,6 +1342,13 @@ sap.ui.define([
                         that._bInitialLoadInProgress = false;
                         that._loadCirGenChartAndCharacteristics(sLocation, sProduct, oStartDate, oEndDate, []);
                     }
+                    that.byId("idMRPG").setSelectedKeys([]);
+                    that.byId("idMRPT").setSelectedKeys([]);
+                    that.byId("idAssembly").setSelectedKeys([]);
+                    that.onOpenMRPG();
+                    that.onOpenMRPT();
+                    that.onOpenAsmb();
+                   
                 },
                 error: function (oError) {
                     console.error("Error fetching Unique IDs", oError);
@@ -2141,12 +2182,27 @@ sap.ui.define([
         // Replace your existing onCharacteristicChange function with this:
 
         onCharacteristicChange: function (oEvent) {
+               that.showBusyIndicator(true);
 
+            // console.log(new Date())
+            // if (that._bSelectionInProgress) {
+            //     console.log("Click ignored: still processing previous selection");
+            //     return;
+            // }
+            // that._bSelectionInProgress = true;
 
-            this._bCharSelectionInProgress = true;
+            const now = Date.now();
+
+            // Ignore clicks that occur within 200ms of the previous one
+            if (now - this._lastClickTime < 200) {
+                console.log("⚠️ Rapid click ignored");
+                return;
+            }
+
+            this._lastClickTime = now;
 
             try {
-                // that.showBusyIndicator(true);
+             
 
 
                 var oList = that.byId("idCharacteristics")// oEvent.getSource();
@@ -2211,7 +2267,11 @@ sap.ui.define([
                         // this._clearUniqueIDSelection();
                         that.showBusyIndicator(false);
                     }
-                    return;
+                    setTimeout(function () {
+                        that._bSelectionInProgress = false;
+                    }.bind(that), 300);
+                     return;
+                   
                 }
 
                 var aSelectedKeys = aSelectedItems.map(i => i.getTitle()).filter(t => t !== "Select All");
@@ -2239,6 +2299,9 @@ sap.ui.define([
                     // }
                     // this._clearUniqueIDSelection();
                 }
+                setTimeout(function () {
+                    that._bSelectionInProgress = false;
+                }.bind(that), 300);
             } finally {
                 this._bCharSelectionInProgress = false;
                 console.log("finally")
@@ -4560,7 +4623,7 @@ sap.ui.define([
         loadForecastChartMRP: function (baseFilter) {
             var oModel = this.getView().getModel();
             let sApply = `filter(${baseFilter})/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`;
-
+            that.showBusyIndicator(true);
             oModel.read("/getAsmbReqAnalysis", {
                 urlParameters: {
                     $apply: sApply, //`filter(LOCATION_ID eq '${sLocation}' and PRODUCT_ID eq '${sProduct}' and (WEEK_DATE ge ${oStartDate.toLocaleDateString("en-CA")} and WEEK_DATE le ${oEndDate.toLocaleDateString("en-CA")}) and (${unique}))/groupby((UNIQUE_ID,WEEK_DATE,ASSEMBLY_DESCRIPTION,CIR_QTY,COUNT))`,
@@ -4927,7 +4990,7 @@ sap.ui.define([
         loadActualChartMRP: function (baseFilter) {
             var oModel = this.getView().getModel();
             let sApply = `filter(${baseFilter})/groupby((WEEK_DATE,ASSEMBLY_DESCRIPTION,ACTUAL_QTY,COUNT))`;
-
+            that.showBusyIndicator(true);
             // Read data from getAsmbReqAnalysis
             oModel.read("/getAsmbReqAnalysis", {
                 // filters: aFilters,
@@ -6013,6 +6076,9 @@ sap.ui.define([
             that.byId("idMRPG").setSelectedKeys([]);
             that.byId("idMRPT").setSelectedKeys([]);
             that.byId("idAssembly").setSelectedKeys([]);
+             that.onOpenMRPG();
+                    that.onOpenMRPT();
+                    that.onOpenAsmb();
         }
     });
 });
@@ -6023,3 +6089,4 @@ sap.ui.define([
 //////////button changes and MRP Filters 05-11-2025/////
 ////////////////Combobox Data limit Increase 07-11-2025//////////////
 ////////////////Apply Filter issue & error display 08-11-2025////////////////////////
+///////////////// Descriptions 10-11-2025////////////////////////////////////////
