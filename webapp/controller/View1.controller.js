@@ -24,6 +24,12 @@ sap.ui.define([
             that.data = []
             that.prev = [];
             that.applyFilterData = [];
+            if (sap.ushell) {
+                that.sUser = sap.ushell?.Container?.getService("UserInfo")?.getEmail()
+            }
+            if(!that.sUser){
+            that.sUser='null';
+        }
 
 
             // try {
@@ -35,10 +41,11 @@ sap.ui.define([
             //     $apply: 'groupby((LOCATION_ID),aggregate($count as Count))'
             // });
 
-            that.oModel.read("/getfactorylocdesc", {
+
+            that.oModel.read("/getRolesLocProd", {
                 // filters: aFilters,
                 urlParameters: {
-                    $apply: 'groupby((DEMAND_LOC,DEMAND_DESC),aggregate($count as Count))',
+                    $apply: `filter(USER eq '${that.sUser}')/groupby((DEMAND_LOC,DEMAND_DESC,MRP_GROUP),aggregate($count as Count))`,
                     // "$select": "WEEK_DATE,ASSEMBLY_DESC,CIR_QTY,COUNT",
                     "$top": 100000
                 },
@@ -47,6 +54,12 @@ sap.ui.define([
                     var locationModel = new JSONModel(oData.results);
                     locationModel.setSizeLimit(10000);
                     that.byId("idLocation").setModel(locationModel);
+
+                    that.roleMrpGroup = [...new Set(oData.results.map(o => o.MRP_GROUP))];
+
+                    that.roleTypeGroup = [...new Set(oData.results.map(o => o.MRP_TYPE))];
+
+                   
                     // console.log("Locations loaded:", loc);
 
                     that.byId("idLocation").setSelectedKey("");
@@ -516,7 +529,7 @@ sap.ui.define([
             }
 
             let sApply = `filter(${baseFilter})/groupby((MRP_GROUP))`;
-            const mrpgData = await that.readModel("getAsmbReqAnalysis", {
+            let mrpgData = await that.readModel("getAsmbReqAnalysis", {
                 $apply: sApply,
                 $top: 100000,
             });
@@ -525,6 +538,12 @@ sap.ui.define([
                     x.MRP_GROUP = "null";
                 }
             })
+
+            if (that.roleMrpGroup && that.roleMrpGroup.length > 0) {
+                mrpgData = mrpgData.filter(m => that.roleMrpGroup.includes(m.MRP_GROUP))
+            } else {
+                mrpgData = [];
+            }
             mrpgData.sort((a, b) => {
                 const valA = (a.MRP_GROUP || '').toString();
                 const valB = (b.MRP_GROUP || '').toString();
@@ -595,7 +614,7 @@ sap.ui.define([
             }
 
             let sApply = `filter(${baseFilter})/groupby((MRP_TYPE))`;
-            const mrptData = await that.readModel("getAsmbReqAnalysis", {
+            let mrptData = await that.readModel("getAsmbReqAnalysis", {
                 $apply: sApply,
                 $top: 100000,
             });
@@ -910,9 +929,9 @@ sap.ui.define([
             //  const prodData = await this.readModel("getPlannedOrdAnalysis", {
             //         $apply: `filter(LOCATION_ID eq '${selectedLocation}' and CONFIGURATION_PRODUCT eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID),aggregate($count as Count))`
             //     });
-            that.oModel.read("/getfactorylocdesc", {
+            that.oModel.read("/getRolesLocProd", {
                 urlParameters: {
-                    $apply: `filter(DEMAND_LOC eq '${selectedLocation}' and REF_PRODID eq '${sSelectedConfigProduct}')/groupby((PRODUCT_ID,PROD_DESC))`
+                    $apply: `filter(DEMAND_LOC eq '${selectedLocation}' and REF_PRODID eq '${sSelectedConfigProduct}' and USER eq '${that.sUser}')/groupby((PRODUCT_ID,PROD_DESC))`
 
                 },
                 success: function (oData) {
@@ -980,8 +999,8 @@ sap.ui.define([
                 //     $apply: `filter(LOCATION_ID eq '${locationId}')/groupby((CONFIGURATION_PRODUCT),aggregate($count as Count))`
                 // });
 
-                const configData = await this.readModel("getfactorylocdesc", {
-                    $apply: `filter(DEMAND_LOC eq '${locationId}')/groupby((REF_PRODID,REFPROD_DESC))`
+                const configData = await this.readModel("getRolesLocProd", {
+                    $apply: `filter(DEMAND_LOC eq '${locationId}' and USER eq '${that.sUser}')/groupby((REF_PRODID,REFPROD_DESC))`
                 });
 
                 console.log("Config products loaded:", configData.length);
@@ -6125,7 +6144,7 @@ sap.ui.define([
             }
 
             let sApply = `filter(${baseFilter})/groupby((MRP_GROUP))`;
-            const mrpgData = await that.readModel("getAsmbReqAnalysis", {
+            let mrpgData = await that.readModel("getAsmbReqAnalysis", {
                 $apply: sApply,
                 $top: 100000,
             });
@@ -6134,6 +6153,11 @@ sap.ui.define([
                     x.MRP_GROUP = "null";
                 }
             })
+            if (that.roleMrpGroup && that.roleMrpGroup.length > 0) {
+                mrpgData = mrpgData.filter(m => that.roleMrpGroup.includes(m.MRP_GROUP))
+            } else {
+                mrpgData = [];
+            }
             mrpgData.sort((a, b) => {
                 const valA = (a.MRP_GROUP || '').toString();
                 const valB = (b.MRP_GROUP || '').toString();
@@ -6161,7 +6185,7 @@ sap.ui.define([
             /////////////////////////
 
             let sApply1 = `filter(${baseFilter})/groupby((MRP_TYPE))`;
-            const mrptData = await that.readModel("getAsmbReqAnalysis", {
+            let mrptData = await that.readModel("getAsmbReqAnalysis", {
                 $apply: sApply1,
                 $top: 100000,
             });
