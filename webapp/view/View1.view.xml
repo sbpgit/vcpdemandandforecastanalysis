@@ -48,7 +48,7 @@
 
                             <fb:FilterGroupItem
                                 name="ConfigurationProduct"
-                                label="Configuration Product"
+                                label="Configurable product"
                                 groupName="Group1"
                                 visibleInFilterBar="true"
                                 mandatory="true"
