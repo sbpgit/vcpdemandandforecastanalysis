@@ -76,7 +76,7 @@
           "bundleName": "vcp.vcpdemandandforecastanalysis.i18n.i18n"
         }
       },
-       "oModel": {
+      "oModel": {
         "dataSource": "mainService",
         "preload": true,
         "settings": {}
@@ -133,11 +133,10 @@
     "public": true,
     "service": "vcpvcpdemandandforecastanalysis"
   },
-   "sap.platform.cf": {
+  "sap.platform.cf": {
     "oAuthScopes": [
-        "$XSAPPNAME.User"
-
+      "$XSAPPNAME.User"
     ],
     "ui5VersionNumber": "1.120.41"
-}
+  }
 }
