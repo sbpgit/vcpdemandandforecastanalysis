@@ -1641,10 +1641,10 @@ sap.ui.define([
                     oData.results.forEach(function (item) {
                         var productId = item.PRODUCT_ID;
                         if (!groupedData[productId]) {
-                            groupedData[productId] = { Product: productId, Actual: 0, Forecast: 0 };
+                            groupedData[productId] = { Product: productId, Actual: 0, Unconsumed: 0 };
                         }
                         groupedData[productId].Actual += (item.ACTUAL_QTY || 0);
-                        groupedData[productId].Forecast += (item.UNCONSUMED_FORECAST || 0);
+                        groupedData[productId].Unconsumed += (item.UNCONSUMED_FORECAST || 0);
                     });
 
                     var aChartData = Object.values(groupedData);
@@ -1660,7 +1660,7 @@ sap.ui.define([
                         }],
                         measures: [
                             { name: "Actual", value: "{Actual}" },
-                            { name: "Forecast", value: "{Forecast}" }
+                            { name: "Unconsumed", value: "{Unconsumed}" }
                         ],
                         data: { path: "/chartData" }
                     });
@@ -1679,7 +1679,7 @@ sap.ui.define([
                     oVizFrame.addFeed(new sap.viz.ui5.controls.common.feeds.FeedItem({
                         uid: "valueAxis",
                         type: "Measure",
-                        values: ["Forecast", "Actual"]
+                        values: ["Unconsumed", "Actual"]
                     }));
 
                     // Set properties with data labels
@@ -1706,7 +1706,7 @@ sap.ui.define([
                                         displayName: "Actual"
                                     },
                                     {
-                                        dataContext: { Forecast: "*" },
+                                        dataContext: { Unconsumed: "*" },
                                         properties: {
                                             color: "#809e57"
                                         },
